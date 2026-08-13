@@ -417,17 +417,22 @@
   .g2048-tile .tile-num { position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
   /* ===== nonogram ===== */
+  #view-nonogram { overflow-y: auto; overflow-x: hidden; padding: 0 4px 12px; }
+  #view-nonogram .topbar { width: 100%; gap: 7px; margin-bottom: 8px; }
+  #view-nonogram .stats { gap: clamp(10px, 5vw, 20px); margin-bottom: 8px; }
+  #view-nonogram .stage-wrap { width: 100%; align-items: flex-start; overflow: visible; }
   .nonogram-stage {
-    width: min(96vw, 820px); max-height: min(72vh, 700px); overflow: auto;
+    width: min(100%, 820px); max-height: none; overflow: visible;
     background: var(--panel); border: 1px solid var(--border);
-    border-radius: 20px; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border-radius: 18px; padding: clamp(8px, 3vw, 16px); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     backdrop-filter: blur(12px);
   }
   .nonogram-board {
     --nonogram-size: 10;
-    display: grid; grid-template-columns: 78px repeat(var(--nonogram-size), minmax(30px, 1fr));
-    grid-template-rows: 72px repeat(var(--nonogram-size), minmax(32px, 1fr));
-    min-width: 458px; aspect-ratio: 1.08 / 1; gap: 2px;
+    display: grid;
+    grid-template-columns: clamp(50px, 18vw, 78px) repeat(var(--nonogram-size), minmax(0, 1fr));
+    grid-template-rows: clamp(58px, 18vw, 72px) repeat(var(--nonogram-size), minmax(28px, 1fr));
+    width: 100%; min-width: 0; aspect-ratio: 1.08 / 1; gap: 2px;
   }
   .nonogram-corner { border-radius: 10px; background: rgba(255,255,255,0.03); }
   .nonogram-clue {
@@ -438,9 +443,9 @@
   .nonogram-col-clue { align-items: end; padding: 4px 2px 8px; }
   .nonogram-row-clue { justify-content: end; padding: 0 10px 0 4px; }
   .nonogram-cell {
-    touch-action: manipulation;
-    appearance: none; border: 1px solid rgba(255,255,255,0.08); border-radius: 5px;
-    background: rgba(255,255,255,0.045); cursor: pointer; position: relative;
+    touch-action: manipulation; -webkit-user-select: none; user-select: none;
+    appearance: none; border: 1px solid rgba(255,255,255,0.1); border-radius: clamp(3px, 1vw, 5px);
+    background: rgba(255,255,255,0.045); cursor: pointer; position: relative; min-width: 0; min-height: 0; padding: 0;
     transition: background .14s, transform .12s, border-color .14s;
   }
   .nonogram-cell:hover { border-color: var(--accent); background: rgba(56,189,248,0.12); }
@@ -452,7 +457,17 @@
   .nonogram-cell.wrong { background: rgba(239,68,68,0.8); border-color: #fca5a5; animation: nonogram-shake .28s ease-in-out; }
   .nonogram-cell.solved { background: linear-gradient(135deg, #10b981, #047857); border-color: #6ee7b7; }
   @keyframes nonogram-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
-  .nonogram-tip { color: var(--muted); font-size: 12px; text-align: center; margin-top: 10px; }
+  .nonogram-tip { color: var(--muted); font-size: 12px; text-align: center; margin-top: 10px; line-height: 1.45; }
+  @media (max-width: 520px) {
+    #view-nonogram .topbar { justify-content: stretch; flex-wrap: wrap; }
+    #view-nonogram .diff { flex: 1 1 100%; justify-content: center; }
+    #view-nonogram .topbar > .btn { flex: 1 1 0; min-width: 0; padding: 8px 8px; }
+    #view-nonogram .stats { justify-content: space-between; width: 100%; font-size: 12px; }
+    .nonogram-clue { font-size: clamp(10px, 3vw, 12px); }
+    .nonogram-row-clue { padding-right: clamp(5px, 2vw, 10px); }
+    .nonogram-col-clue { padding-bottom: 6px; }
+    .nonogram-tip { font-size: 11px; }
+  }
 
   /* ===== deng-le-deng ===== */
   .deng-controls { flex-wrap: nowrap; gap: 5px; margin-bottom: 5px; }
@@ -1585,8 +1600,8 @@ function renderNonogram() {
   const size = nState.size;
   board.innerHTML = '';
   board.style.setProperty('--nonogram-size', size);
-  board.style.gridTemplateColumns = `78px repeat(${size}, minmax(30px, 1fr))`;
-  board.style.gridTemplateRows = `72px repeat(${size}, minmax(32px, 1fr))`;
+  board.style.gridTemplateColumns = `clamp(50px, 18vw, 78px) repeat(${size}, minmax(0, 1fr))`;
+  board.style.gridTemplateRows = `clamp(58px, 18vw, 72px) repeat(${size}, minmax(28px, 1fr))`;
 
   const corner = document.createElement('div');
   corner.className = 'nonogram-corner';
