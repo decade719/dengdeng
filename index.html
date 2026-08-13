@@ -470,10 +470,12 @@
   }
 
   /* ===== link-up ===== */
-  #view-linkup { overflow-y: auto; overflow-x: hidden; padding: 0 4px 12px; }
-  #view-linkup .topbar { width: 100%; gap: 7px; margin-bottom: 8px; }
+  #view-linkup { overflow-y: auto; overflow-x: hidden; padding: 0 4px 14px; align-items: stretch; min-height: 0; }
+  #view-linkup .linkup-title { flex: 0 0 auto; margin: 4px 0 7px; line-height: 1.2; }
+  #view-linkup .topbar { width: 100%; gap: 7px; margin-bottom: 8px; flex: 0 0 auto; }
+  #view-linkup .stats, #view-linkup .stage-wrap, #view-linkup .footnote { flex: 0 0 auto; }
   #view-linkup .diff { flex: 0 0 auto; }
-  .linkup-stage { width: min(96vw, 620px); display: flex; flex-direction: column; gap: 9px; }
+  .linkup-stage { width: min(100%, 620px); margin: 0 auto; display: flex; flex-direction: column; gap: 9px; }
   .linkup-title { color: #fcd34d; font-size: clamp(18px, 4vw, 26px); font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 18px rgba(251,191,36,.35); }
   .linkup-board-shell { position: relative; width: 100%; padding: clamp(8px, 2.4vw, 14px); border: 1px solid rgba(56,189,248,.24); border-radius: 20px; background: linear-gradient(145deg, rgba(15,23,42,.94), rgba(30,41,59,.84)); box-shadow: inset 0 0 32px rgba(56,189,248,.06), 0 18px 45px rgba(0,0,0,.42); }
   .linkup-board { --link-cols: 6; --link-rows: 8; position: relative; display: grid; grid-template-columns: repeat(var(--link-cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--link-rows), minmax(0, 1fr)); gap: clamp(3px, 1.2vw, 7px); width: 100%; aspect-ratio: var(--link-cols) / var(--link-rows); }
@@ -492,12 +494,18 @@
   .linkup-message.success { color: #6ee7b7; }
   .linkup-message.danger { color: #fda4af; }
   @media (max-width: 520px) {
-    #view-linkup .topbar { justify-content: stretch; flex-wrap: wrap; }
-    #view-linkup .diff { flex: 1 1 100%; justify-content: center; }
-    #view-linkup .topbar > .btn { flex: 1 1 0; min-width: 0; padding: 8px 7px; }
-    #view-linkup .stats { justify-content: space-between; width: 100%; font-size: 12px; }
+    #view-linkup .topbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; align-items: stretch; padding: 0 2px; }
+    #view-linkup .diff { grid-column: 1 / -1; width: 100%; justify-content: center; }
+    #view-linkup .topbar > .btn { width: 100%; min-width: 0; padding: 8px 6px; }
+    #view-linkup .stats { justify-content: space-between; width: 100%; padding: 0 4px; font-size: 12px; }
     .linkup-stage { width: 100%; }
+    .linkup-board-shell { padding: 8px; border-radius: 16px; }
     .linkup-message { font-size: 12px; }
+  }
+  @media (max-width: 360px) {
+    #view-linkup { padding-left: 0; padding-right: 0; }
+    .linkup-title { font-size: 19px; }
+    #view-linkup .topbar > .btn { font-size: 12px; }
   }
 
   /* ===== deng-le-deng ===== */
@@ -627,10 +635,20 @@
   .online-pill { display:flex; align-items:center; gap:6px; padding:7px 10px; border:1px solid rgba(74,222,128,.25); border-radius:999px; color:#86efac; background:rgba(16,185,129,.08); font-size:11px; }
   .online-dot { width:7px; height:7px; border-radius:50%; background:#4ade80; box-shadow:0 0 10px #4ade80; animation:onlinePulse 1.5s ease-in-out infinite; }
   @keyframes onlinePulse { 50% { opacity:.35; transform:scale(.7); } }
-  .home-hero { position:relative; display:grid; grid-template-columns:1.12fr .88fr; gap:20px; min-height:300px; overflow:hidden; border:1px solid rgba(251,191,36,.38); border-radius:26px; padding:26px; background:linear-gradient(120deg,rgba(78,50,10,.88),rgba(18,26,45,.88) 58%,rgba(12,19,32,.9)); box-shadow:0 24px 70px rgba(0,0,0,.45), 0 0 45px rgba(251,191,36,.1); }
-  .home-hero::before { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg,transparent 0 40%,rgba(255,255,255,.07) 50%,transparent 60%); transform:translateX(-120%); animation:heroScan 7s linear infinite; }
+  .home-hero { position:relative; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; overflow:visible; border:0; border-radius:0; padding:0; background:none; box-shadow:none; }
+  .hero-feature { position:relative; display:grid; grid-template-rows:auto minmax(150px,1fr); gap:14px; min-height:360px; overflow:hidden; padding:22px; border:1px solid rgba(251,191,36,.38); border-radius:26px; background:linear-gradient(120deg,rgba(78,50,10,.9),rgba(18,26,45,.9) 58%,rgba(12,19,32,.94)); box-shadow:0 24px 70px rgba(0,0,0,.45), 0 0 45px rgba(251,191,36,.1); }
+  .hero-feature::before { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg,transparent 0 40%,rgba(255,255,255,.07) 50%,transparent 60%); transform:translateX(-120%); animation:heroScan 7s linear infinite; }
+  .hero-feature-link { border-color:rgba(34,211,238,.42); background:linear-gradient(120deg,rgba(21,50,72,.94),rgba(30,25,67,.92) 58%,rgba(12,19,32,.95)); box-shadow:0 24px 70px rgba(0,0,0,.45), 0 0 45px rgba(34,211,238,.12); }
   @keyframes heroScan { to { transform:translateX(120%); } }
-  .hero-copy { position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; }
+  .hero-copy { position:relative; z-index:1; display:flex; flex-direction:column; justify-content:flex-start; align-items:flex-start; }
+  .hero-feature-link .hero-kicker { color:#a5f3fc; }
+  .hero-feature-link .hero-copy h1 { background:linear-gradient(120deg,#ecfeff,#67e8f9 45%,#a78bfa); -webkit-background-clip:text; background-clip:text; }
+  .hero-feature-link .hero-play { background:linear-gradient(135deg,#22d3ee,#7c3aed); color:#f5f3ff; box-shadow:0 10px 24px rgba(124,58,237,.3); }
+  .hero-feature-link .hero-play:hover { filter:brightness(1.12); }
+  .hero-feature-link .hero-art { background:linear-gradient(145deg,rgba(34,211,238,.2),rgba(15,23,42,.45)), url('images/deng/3.webp') center/cover; }
+  .hero-feature-link .hero-art::after { content:"双主打"; background:#a5f3fc; color:#082f49; }
+  .hero-feature-link .hero-art::before { content:"连线 / 路线 / 消除"; }
+  .hero-feature-link .hero-note { color:#c4b5fd; }
   .hero-kicker { color:#fde68a; font-size:11px; font-weight:800; letter-spacing:3px; margin-bottom:10px; }
   .hero-copy h1 { margin:0 0 10px; font-size:clamp(30px,7vw,58px); line-height:1.02; letter-spacing:-1px; background:linear-gradient(120deg,#fff7ed,#fcd34d 45%,#fb923c); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
   .hero-copy p { max-width:510px; margin:0; color:#cbd5e1; font-size:14px; line-height:1.8; }
@@ -641,7 +659,7 @@
   .hero-art { position:relative; min-height:240px; border-radius:20px; overflow:hidden; background:linear-gradient(145deg,rgba(245,158,11,.2),rgba(15,23,42,.45)), url('images/2nd.webp') center/cover; border:1px solid rgba(255,255,255,.16); box-shadow:inset 0 0 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.32); transform:rotate(2deg); }
   .hero-art::after { content:"主打挑战"; position:absolute; right:12px; top:12px; padding:5px 9px; border-radius:999px; color:#451a03; background:#fde68a; font-size:10px; font-weight:900; box-shadow:0 0 18px rgba(253,230,138,.5); }
   .hero-art::before { content:"三消 / 观察 / 规划"; position:absolute; left:12px; bottom:12px; padding:7px 10px; border-radius:9px; color:#fff; background:rgba(15,23,42,.75); border:1px solid rgba(255,255,255,.15); font-size:11px; backdrop-filter:blur(6px); }
-  .home-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:14px 0 24px; }
+  .home-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0 24px; }
   .metric { min-width:0; padding:12px 14px; border:1px solid rgba(255,255,255,.08); border-radius:15px; background:rgba(23,28,41,.68); }
   .metric strong { display:block; color:#fff; font-size:18px; line-height:1.1; }
   .metric span { color:#94a3b8; font-size:11px; }
@@ -665,8 +683,8 @@
   .game-tags { position:relative; z-index:1; display:flex; gap:5px; flex-wrap:wrap; margin-top:auto; }
   .game-tag { padding:3px 7px; border-radius:999px; color:#cbd5e1; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); font-size:10px; }
   .home-footer { display:flex; justify-content:space-between; gap:12px; margin-top:24px; padding:14px 2px 0; border-top:1px solid rgba(255,255,255,.08); color:#64748b; font-size:11px; }
-  @media (max-width:820px) { .home-hero { grid-template-columns:1fr; padding:20px; } .hero-art { min-height:190px; transform:rotate(1deg); } .games-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-  @media (max-width:480px) { .home-shell { padding-left:12px; padding-right:12px; } .home-nav { padding-bottom:13px; } .online-pill { font-size:10px; padding:6px 8px; } .home-hero { min-height:0; border-radius:21px; padding:18px; } .hero-copy h1 { font-size:38px; } .hero-copy p { font-size:13px; } .hero-art { min-height:155px; } .home-metrics { gap:7px; margin-bottom:19px; } .metric { padding:10px 9px; } .metric strong { font-size:16px; } .metric span { font-size:10px; } .section-head { align-items:flex-start; flex-direction:column; gap:3px; } .games-grid { gap:9px; } .games-grid .game-card { min-height:166px; padding:12px; border-radius:15px; } .game-name { font-size:14px; } .home-footer { flex-direction:column; gap:4px; } }
+  @media (max-width:820px) { .home-hero { grid-template-columns:1fr; padding:0; } .hero-feature { min-height:340px; } .hero-art { min-height:190px; transform:rotate(1deg); } .games-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width:480px) { .home-shell { padding-left:12px; padding-right:12px; } .home-nav { padding-bottom:13px; } .online-pill { font-size:10px; padding:6px 8px; } .home-hero { min-height:0; padding:0; } .hero-feature { min-height:0; padding:18px; border-radius:21px; } .hero-copy h1 { font-size:38px; } .hero-copy p { font-size:13px; } .hero-art { min-height:155px; } .home-metrics { gap:7px; margin-bottom:19px; } .metric { padding:10px 9px; } .metric strong { font-size:16px; } .metric span { font-size:10px; } .section-head { align-items:flex-start; flex-direction:column; gap:3px; } .games-grid { gap:9px; } .games-grid .game-card { min-height:166px; padding:12px; border-radius:15px; } .game-name { font-size:14px; } .home-footer { flex-direction:column; gap:4px; } }
 </style>
 </head>
 <body id="site-body">
@@ -680,22 +698,36 @@
         <div class="online-pill"><span class="online-dot"></span> 随时可玩 · 手机优先</div>
       </nav>
 
-      <section class="home-hero">
-        <div class="hero-copy">
-          <div class="hero-kicker">MAIN QUEST / 001</div>
-          <h1>蹬了个蹬</h1>
-          <p>照片堆叠消除挑战。先观察，再点击，凑齐三张自动消除；别让底部收集槽被填满，真正考验你的路线规划。</p>
-          <div class="hero-actions">
-            <a class="hero-play" href="app.html?game=deng">立即开蹬 <span>→</span></a>
-            <span class="hero-note">预计一局 2–5 分钟</span>
+      <section class="home-hero" aria-label="双主打游戏">
+        <article class="hero-feature">
+          <div class="hero-copy">
+            <div class="hero-kicker">MAIN QUEST / 001</div>
+            <h1>蹬了个蹬</h1>
+            <p>照片堆叠消除挑战。先观察，再点击，凑齐三张自动消除；别让底部收集槽被填满，真正考验你的路线规划。</p>
+            <div class="hero-actions">
+              <a class="hero-play" href="app.html?game=deng">立即开蹬 <span>→</span></a>
+              <span class="hero-note">预计一局 2–5 分钟</span>
+            </div>
           </div>
-        </div>
-        <div class="hero-art" role="img" aria-label="蹬了个蹬主打游戏预览"></div>
+          <div class="hero-art" role="img" aria-label="蹬了个蹬主打游戏预览"></div>
+        </article>
+        <article class="hero-feature hero-feature-link">
+          <div class="hero-copy">
+            <div class="hero-kicker">MAIN QUEST / 002</div>
+            <h1>蹬蹬连连看</h1>
+            <p>复用蹬了个蹬的写真素材，找到两张相同图片，规划不超过两次转弯的连线路径。</p>
+            <div class="hero-actions">
+              <a class="hero-play" href="app.html?game=linkup">开始连线 <span>→</span></a>
+              <span class="hero-note">轻松局 6×8 · 支持答题洗牌</span>
+            </div>
+          </div>
+          <div class="hero-art" role="img" aria-label="蹬蹬连连看主打游戏预览"></div>
+        </article>
       </section>
 
       <section class="home-metrics" aria-label="游戏站数据">
         <div class="metric"><strong>09</strong><span>款小游戏</span></div>
-        <div class="metric"><strong>01</strong><span>主打挑战</span></div>
+        <div class="metric"><strong>02</strong><span>主打挑战</span></div>
         <div class="metric"><strong>100%</strong><span>无需安装</span></div>
       </section>
 
@@ -709,6 +741,7 @@
           <button class="filter-btn" type="button" data-filter="relax">解压</button>
         </div>
         <div class="games-grid">
+          <a class="game-card" data-category="featured" href="app.html?game=linkup" style="--grad:linear-gradient(135deg,#22d3ee,#7c3aed)"><div class="game-card-top"><div class="game-icon">🔗</div><span class="game-status">主打</span></div><div class="game-name">蹬蹬连连看</div><div class="game-desc">连接相同照片，规划最多两次转弯的路线，答题还能获得洗牌机会。</div><div class="game-tags"><span class="game-tag">连连看</span><span class="game-tag">答题洗牌</span></div></a>
           <a class="game-card" data-category="featured" href="app.html?game=deng" style="--grad:linear-gradient(135deg,#fbbf24,#ea580c)"><div class="game-card-top"><div class="game-icon">👟</div><span class="game-status">主打</span></div><div class="game-name">蹬了个蹬</div><div class="game-desc">观察堆叠层级，三张合成，规划每一次点击。</div><div class="game-tags"><span class="game-tag">三消</span><span class="game-tag">策略</span></div></a>
           <a class="game-card" data-category="logic" href="app.html?game=puzzle" style="--grad:linear-gradient(135deg,#3b82f6,#1d4ed8)"><div class="game-card-top"><div class="game-icon">🧩</div><span class="game-status">可挑战</span></div><div class="game-name">数字滑块拼图</div><div class="game-desc">滑动方块，把照片与数字顺序一起复原。</div><div class="game-tags"><span class="game-tag">拼图</span><span class="game-tag">手势</span></div></a>
           <a class="game-card" data-category="memory" href="app.html?game=memory" style="--grad:linear-gradient(135deg,#a855f7,#7e22ce)"><div class="game-card-top"><div class="game-icon">✨</div><span class="game-status">耐玩</span></div><div class="game-name">沉浸翻牌配对</div><div class="game-desc">记住每一张切片的位置，翻出全部相同图案。</div><div class="game-tags"><span class="game-tag">记忆</span><span class="game-tag">配对</span></div></a>
@@ -717,7 +750,6 @@
           <a class="game-card" data-category="relax" href="app.html?game=scratch" style="--grad:linear-gradient(135deg,#ec4899,#be185d)"><div class="game-card-top"><div class="game-icon">🎁</div><span class="game-status">解压</span></div><div class="game-name">心动刮刮乐</div><div class="game-desc">擦去覆盖层，一点点揭开隐藏照片。</div><div class="game-tags"><span class="game-tag">互动</span><span class="game-tag">惊喜</span></div></a>
           <a class="game-card" data-category="logic" href="app.html?game=2048" style="--grad:linear-gradient(135deg,#f97316,#c2410c)"><div class="game-card-top"><div class="game-icon">🎲</div><span class="game-status">连击</span></div><div class="game-name">写真 2048</div><div class="game-desc">滑动合并相同碎片，逐步解锁更清晰的画面。</div><div class="game-tags"><span class="game-tag">合并</span><span class="game-tag">数字</span></div></a>
           <a class="game-card" data-category="logic" href="app.html?game=nonogram" style="--grad:linear-gradient(135deg,#06b6d4,#0e7490)"><div class="game-card-top"><div class="game-icon">🔢</div><span class="game-status">动脑</span></div><div class="game-name">数织解谜</div><div class="game-desc">根据行列数字推导格子，揭开隐藏图案。</div><div class="game-tags"><span class="game-tag">数织</span><span class="game-tag">推理</span></div></a>
-          <a class="game-card" data-category="memory" href="app.html?game=linkup" style="--grad:linear-gradient(135deg,#22d3ee,#7c3aed)"><div class="game-card-top"><div class="game-icon">🔗</div><span class="game-status">新上线</span></div><div class="game-name">蹬蹬连连看</div><div class="game-desc">复用蹬了个蹬素材，连接相同照片，最多两次转弯即可消除。</div><div class="game-tags"><span class="game-tag">连连看</span><span class="game-tag">找路线</span></div></a>
         </div>
       </section>
 
@@ -912,7 +944,7 @@
         </div>
         <button class="btn primary" data-act="linkup-reset">重新开始</button>
         <button class="btn" data-act="linkup-hint">提示 <span data-stat="linkup-hints">3</span></button>
-        <button class="btn warn" data-act="linkup-shuffle">洗牌 <span data-stat="linkup-shuffles">3</span></button>
+        <button class="btn warn" data-act="linkup-shuffle">答题洗牌 <span data-stat="linkup-shuffles">3</span></button>
       </div>
       <div class="stats">
         <div>剩余 <b data-stat="linkup-left">48</b></div>
@@ -930,6 +962,15 @@
       </div>
       <div class="footnote">蹬蹬连连看 · 相同图片最多转弯两次即可消除</div>
     </section>
+
+    <div class="deng-modal" id="linkup-quiz-modal">
+      <div class="deng-modal-card">
+        <div class="deng-modal-title"><span>🧠 答题洗牌挑战</span></div>
+        <div class="deng-quiz-q" id="linkup-quiz-q">回答正确即可洗牌</div>
+        <div class="deng-options" id="linkup-quiz-options"></div>
+        <button class="btn" data-act="linkup-quiz-close">暂不洗牌</button>
+      </div>
+    </div>
 
     <!-- ===== NONOGRAM ===== -->
     <section class="view" id="view-nonogram">
@@ -1831,6 +1872,7 @@ function createLinkPairs(total) {
 
 function initLinkup() {
   stopAllTimers();
+  closeLinkQuiz();
   const config = LINK_LEVELS[lState.level] || LINK_LEVELS[1];
   lState.rows = config.rows;
   lState.cols = config.cols;
@@ -2020,7 +2062,7 @@ function giveLinkHint() {
   setLinkMessage('绿色闪烁的是一组可消除图片');
 }
 
-function shuffleLinkup() {
+function performLinkShuffle() {
   if (lState.finished || lState.locked || lState.shuffles <= 0) {
     setLinkMessage(lState.shuffles <= 0 ? '洗牌次数已用完' : '这一局已经完成', 'danger');
     return;
@@ -2037,6 +2079,65 @@ function shuffleLinkup() {
   renderLinkup();
   updateLinkStats();
   setLinkMessage('牌面已洗牌，重新寻找可以连通的组合');
+}
+
+const LINKUP_QUIZ = [
+  { q: '“苹果”的英文是什么？', options: ['Orange', 'Apple', 'Banana', 'Grape'], answer: 1 },
+  { q: '蹬蹬连连看中，两张图片最多可以转弯几次？', options: ['1 次', '2 次', '3 次', '不能转弯'], answer: 1 },
+  { q: '下列哪一个数字是偶数？', options: ['7', '9', '12', '15'], answer: 2 },
+  { q: '三张相同图片自动消除，是哪款主打游戏的规则？', options: ['蹬了个蹬', '数织解谜', '写真 2048', '刮刮乐'], answer: 0 }
+];
+
+function closeLinkQuiz() {
+  const modal = $('#linkup-quiz-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function openLinkQuiz() {
+  if (lState.finished || lState.locked) return;
+  const modal = $('#linkup-quiz-modal');
+  const question = LINKUP_QUIZ[Math.floor(Math.random() * LINKUP_QUIZ.length)];
+  $('#linkup-quiz-q').textContent = question.q;
+  const options = $('#linkup-quiz-options');
+  options.innerHTML = '';
+  question.options.forEach((text, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'deng-option';
+    button.textContent = text;
+    button.onclick = () => answerLinkQuiz(button, index === question.answer);
+    options.appendChild(button);
+  });
+  modal.classList.add('active');
+}
+
+function answerLinkQuiz(button, correct) {
+  const options = $all('#linkup-quiz-options .deng-option');
+  options.forEach(option => { option.disabled = true; });
+  if (!correct) {
+    button.classList.add('wrong');
+    setTimeout(() => {
+      options.forEach(option => { option.disabled = false; });
+      setLinkMessage('答案不对，再试一次，答对才能洗牌', 'danger');
+    }, 500);
+    return;
+  }
+  button.classList.add('correct');
+  lState.shuffles++;
+  updateLinkStats();
+  setLinkMessage('回答正确！获得一次洗牌机会', 'success');
+  setTimeout(() => {
+    closeLinkQuiz();
+    performLinkShuffle();
+  }, 450);
+}
+
+function shuffleLinkup() {
+  if (lState.finished || lState.locked) {
+    setLinkMessage(lState.finished ? '这一局已经完成' : '连线动画进行中，请稍候', 'danger');
+    return;
+  }
+  openLinkQuiz();
 }
 
 /* ==================== 7. DENG LE DENG ==================== */
@@ -2430,6 +2531,7 @@ $('[data-act="nonogram-hint"]').onclick = giveNonogramHint;
 $('[data-act="linkup-reset"]').onclick = initLinkup;
 $('[data-act="linkup-hint"]').onclick = giveLinkHint;
 $('[data-act="linkup-shuffle"]').onclick = shuffleLinkup;
+$('[data-act="linkup-quiz-close"]').onclick = closeLinkQuiz;
 $('[data-act="deng-reset"]').onclick = initDeng;
 $('[data-act="deng-hint"]').onclick = hintDeng;
 $('[data-act="deng-shuffle"]').onclick = openDengQuiz;

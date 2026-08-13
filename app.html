@@ -330,10 +330,12 @@
   }
 
   /* ===== link-up ===== */
-  #view-linkup { overflow-y: auto; overflow-x: hidden; padding: 0 4px 12px; }
-  #view-linkup .topbar { width: 100%; gap: 7px; margin-bottom: 8px; }
+  #view-linkup { overflow-y: auto; overflow-x: hidden; padding: 0 4px 14px; align-items: stretch; min-height: 0; }
+  #view-linkup .linkup-title { flex: 0 0 auto; margin: 4px 0 7px; line-height: 1.2; }
+  #view-linkup .topbar { width: 100%; gap: 7px; margin-bottom: 8px; flex: 0 0 auto; }
+  #view-linkup .stats, #view-linkup .stage-wrap, #view-linkup .footnote { flex: 0 0 auto; }
   #view-linkup .diff { flex: 0 0 auto; }
-  .linkup-stage { width: min(96vw, 620px); display: flex; flex-direction: column; gap: 9px; }
+  .linkup-stage { width: min(100%, 620px); margin: 0 auto; display: flex; flex-direction: column; gap: 9px; }
   .linkup-title { color: #fcd34d; font-size: clamp(18px, 4vw, 26px); font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 18px rgba(251,191,36,.35); }
   .linkup-board-shell { position: relative; width: 100%; padding: clamp(8px, 2.4vw, 14px); border: 1px solid rgba(56,189,248,.24); border-radius: 20px; background: linear-gradient(145deg, rgba(15,23,42,.94), rgba(30,41,59,.84)); box-shadow: inset 0 0 32px rgba(56,189,248,.06), 0 18px 45px rgba(0,0,0,.42); }
   .linkup-board { --link-cols: 6; --link-rows: 8; position: relative; display: grid; grid-template-columns: repeat(var(--link-cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--link-rows), minmax(0, 1fr)); gap: clamp(3px, 1.2vw, 7px); width: 100%; aspect-ratio: var(--link-cols) / var(--link-rows); }
@@ -352,12 +354,18 @@
   .linkup-message.success { color: #6ee7b7; }
   .linkup-message.danger { color: #fda4af; }
   @media (max-width: 520px) {
-    #view-linkup .topbar { justify-content: stretch; flex-wrap: wrap; }
-    #view-linkup .diff { flex: 1 1 100%; justify-content: center; }
-    #view-linkup .topbar > .btn { flex: 1 1 0; min-width: 0; padding: 8px 7px; }
-    #view-linkup .stats { justify-content: space-between; width: 100%; font-size: 12px; }
+    #view-linkup .topbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; align-items: stretch; padding: 0 2px; }
+    #view-linkup .diff { grid-column: 1 / -1; width: 100%; justify-content: center; }
+    #view-linkup .topbar > .btn { width: 100%; min-width: 0; padding: 8px 6px; }
+    #view-linkup .stats { justify-content: space-between; width: 100%; padding: 0 4px; font-size: 12px; }
     .linkup-stage { width: 100%; }
+    .linkup-board-shell { padding: 8px; border-radius: 16px; }
     .linkup-message { font-size: 12px; }
+  }
+  @media (max-width: 360px) {
+    #view-linkup { padding-left: 0; padding-right: 0; }
+    .linkup-title { font-size: 19px; }
+    #view-linkup .topbar > .btn { font-size: 12px; }
   }
 
   /* ===== deng-le-deng ===== */
@@ -657,7 +665,7 @@
         </div>
         <button class="btn primary" data-act="linkup-reset">重新开始</button>
         <button class="btn" data-act="linkup-hint">提示 <span data-stat="linkup-hints">3</span></button>
-        <button class="btn warn" data-act="linkup-shuffle">洗牌 <span data-stat="linkup-shuffles">3</span></button>
+        <button class="btn warn" data-act="linkup-shuffle">答题洗牌 <span data-stat="linkup-shuffles">3</span></button>
       </div>
       <div class="stats">
         <div>剩余 <b data-stat="linkup-left">48</b></div>
@@ -675,6 +683,15 @@
       </div>
       <div class="footnote">蹬蹬连连看 · 相同图片最多转弯两次即可消除</div>
     </section>
+
+    <div class="deng-modal" id="linkup-quiz-modal">
+      <div class="deng-modal-card">
+        <div class="deng-modal-title"><span>🧠 答题洗牌挑战</span></div>
+        <div class="deng-quiz-q" id="linkup-quiz-q">回答正确即可洗牌</div>
+        <div class="deng-options" id="linkup-quiz-options"></div>
+        <button class="btn" data-act="linkup-quiz-close">暂不洗牌</button>
+      </div>
+    </div>
 
     <!-- ===== NONOGRAM ===== -->
     <section class="view" id="view-nonogram">
@@ -1574,6 +1591,7 @@ function createLinkPairs(total) {
 
 function initLinkup() {
   stopAllTimers();
+  closeLinkQuiz();
   const config = LINK_LEVELS[lState.level] || LINK_LEVELS[1];
   lState.rows = config.rows;
   lState.cols = config.cols;
@@ -1763,7 +1781,7 @@ function giveLinkHint() {
   setLinkMessage('绿色闪烁的是一组可消除图片');
 }
 
-function shuffleLinkup() {
+function performLinkShuffle() {
   if (lState.finished || lState.locked || lState.shuffles <= 0) {
     setLinkMessage(lState.shuffles <= 0 ? '洗牌次数已用完' : '这一局已经完成', 'danger');
     return;
@@ -1780,6 +1798,65 @@ function shuffleLinkup() {
   renderLinkup();
   updateLinkStats();
   setLinkMessage('牌面已洗牌，重新寻找可以连通的组合');
+}
+
+const LINKUP_QUIZ = [
+  { q: '“苹果”的英文是什么？', options: ['Orange', 'Apple', 'Banana', 'Grape'], answer: 1 },
+  { q: '蹬蹬连连看中，两张图片最多可以转弯几次？', options: ['1 次', '2 次', '3 次', '不能转弯'], answer: 1 },
+  { q: '下列哪一个数字是偶数？', options: ['7', '9', '12', '15'], answer: 2 },
+  { q: '三张相同图片自动消除，是哪款主打游戏的规则？', options: ['蹬了个蹬', '数织解谜', '写真 2048', '刮刮乐'], answer: 0 }
+];
+
+function closeLinkQuiz() {
+  const modal = $('#linkup-quiz-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function openLinkQuiz() {
+  if (lState.finished || lState.locked) return;
+  const modal = $('#linkup-quiz-modal');
+  const question = LINKUP_QUIZ[Math.floor(Math.random() * LINKUP_QUIZ.length)];
+  $('#linkup-quiz-q').textContent = question.q;
+  const options = $('#linkup-quiz-options');
+  options.innerHTML = '';
+  question.options.forEach((text, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'deng-option';
+    button.textContent = text;
+    button.onclick = () => answerLinkQuiz(button, index === question.answer);
+    options.appendChild(button);
+  });
+  modal.classList.add('active');
+}
+
+function answerLinkQuiz(button, correct) {
+  const options = $all('#linkup-quiz-options .deng-option');
+  options.forEach(option => { option.disabled = true; });
+  if (!correct) {
+    button.classList.add('wrong');
+    setTimeout(() => {
+      options.forEach(option => { option.disabled = false; });
+      setLinkMessage('答案不对，再试一次，答对才能洗牌', 'danger');
+    }, 500);
+    return;
+  }
+  button.classList.add('correct');
+  lState.shuffles++;
+  updateLinkStats();
+  setLinkMessage('回答正确！获得一次洗牌机会', 'success');
+  setTimeout(() => {
+    closeLinkQuiz();
+    performLinkShuffle();
+  }, 450);
+}
+
+function shuffleLinkup() {
+  if (lState.finished || lState.locked) {
+    setLinkMessage(lState.finished ? '这一局已经完成' : '连线动画进行中，请稍候', 'danger');
+    return;
+  }
+  openLinkQuiz();
 }
 
 /* ==================== 7. DENG LE DENG ==================== */
@@ -2173,6 +2250,7 @@ $('[data-act="nonogram-hint"]').onclick = giveNonogramHint;
 $('[data-act="linkup-reset"]').onclick = initLinkup;
 $('[data-act="linkup-hint"]').onclick = giveLinkHint;
 $('[data-act="linkup-shuffle"]').onclick = shuffleLinkup;
+$('[data-act="linkup-quiz-close"]').onclick = closeLinkQuiz;
 $('[data-act="deng-reset"]').onclick = initDeng;
 $('[data-act="deng-hint"]').onclick = hintDeng;
 $('[data-act="deng-shuffle"]').onclick = openDengQuiz;
