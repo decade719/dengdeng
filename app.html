@@ -245,15 +245,28 @@
   }
   @keyframes pop { from { transform: translate(-50%, -50%) scale(0.3); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
-  /* ===== scratch ===== */
-  .scratch-stage {
-    position: relative; width: min(88vmin, 500px); aspect-ratio: 1 / 1;
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  }
-  .scratch-canvas { position: absolute; inset: 0; cursor: crosshair; touch-action: none; z-index: 2; }
+  /* ===== scratch memory match ===== */
+  .scratch-stage { width: min(96vw, 680px); padding: clamp(10px, 2.5vw, 18px); background: linear-gradient(145deg, rgba(30,18,55,.95), rgba(15,23,42,.94)); border: 1px solid rgba(236,72,153,.32); border-radius: 22px; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+  .scratch-instructions { min-height: 24px; margin-bottom: 9px; text-align: center; color: #fbcfe8; font-size: clamp(12px, 2.4vw, 14px); font-weight: 800; }
+  .scratch-memory-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(5px, 1.4vw, 10px); min-height: 94px; margin-bottom: 10px; }
+  .scratch-memory-card { position: relative; min-width: 0; aspect-ratio: 1 / .82; perspective: 700px; border: 0; padding: 0; background: transparent; cursor: pointer; touch-action: manipulation; }
+  .scratch-memory-card-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .48s cubic-bezier(.2,.8,.2,1); }
+  .scratch-memory-card.revealed .scratch-memory-card-inner { transform: rotateY(180deg); }
+  .scratch-memory-card.correct { filter: saturate(1.35) brightness(1.14); }
+  .scratch-memory-card.correct .scratch-memory-face.back { border-color: #6ee7b7; box-shadow: 0 0 0 3px rgba(110,231,183,.55), 0 0 22px rgba(16,185,129,.5); }
+  .scratch-memory-card.wrong { animation: scratch-card-shake .34s ease; }
+  .scratch-memory-face { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; backface-visibility: hidden; border: 1px solid rgba(255,255,255,.16); border-radius: 10px; box-shadow: 0 8px 18px rgba(0,0,0,.24); }
+  .scratch-memory-face.front { color: #fbcfe8; background: repeating-linear-gradient(135deg, rgba(236,72,153,.72) 0 8px, rgba(124,58,237,.72) 8px 16px); font-size: clamp(18px, 5vw, 28px); font-weight: 900; }
+  .scratch-memory-face.front::after { content: '?'; display: grid; place-items: center; width: 38%; aspect-ratio: 1; border: 2px solid rgba(255,255,255,.68); border-radius: 50%; text-shadow: 0 0 12px rgba(255,255,255,.8); }
+  .scratch-memory-face.back { transform: rotateY(180deg); background-position: center; background-size: cover; }
+  .scratch-target-label { margin: 4px 0 7px; color: #c4b5fd; font-size: 11px; text-align: center; }
+  .scratch-scrub-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; min-height: 160px; overflow: hidden; border: 1px solid rgba(251,191,36,.35); border-radius: 16px; background: #111827; box-shadow: inset 0 0 30px rgba(251,191,36,.08); }
+  .scratch-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; touch-action: none; z-index: 2; }
   .scratch-img { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 1; }
-  .scratch-percent { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; padding: 4px 10px; border-radius: 999px; font-size: 12px; z-index: 3; pointer-events: none; }
+  .scratch-percent { position: absolute; bottom: 9px; right: 9px; background: rgba(0,0,0,.68); color: #fde68a; padding: 4px 10px; border: 1px solid rgba(253,230,138,.35); border-radius: 999px; font-size: 12px; font-weight: 800; z-index: 3; pointer-events: none; }
+  .scratch-result { min-height: 30px; margin-top: 10px; color: #fef3c7; text-align: center; font-size: 13px; font-weight: 800; }
+  @keyframes scratch-card-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px) rotate(-2deg); } 75% { transform: translateX(5px) rotate(2deg); } }
+  @media (max-width: 520px) { .scratch-stage { padding: 10px; } .scratch-memory-row { min-height: 68px; gap: 4px; } .scratch-memory-face { border-radius: 7px; } .scratch-target-label { font-size: 10px; } .scratch-scrub-wrap { min-height: 145px; } }
 
   /* ===== 2048 ===== */
   .g2048-stage {
@@ -656,19 +669,29 @@
     <!-- ===== SCRATCH ===== -->
     <section class="view" id="view-scratch">
       <div class="topbar">
-        <button class="btn primary" data-act="scratch-reset">重新覆盖</button>
+        <button class="btn primary" data-act="scratch-reset">重新开始</button>
+        <button class="btn" data-act="scratch-next" id="scratch-next" style="display:none">下一轮</button>
       </div>
       <div class="stats">
-        <div>已揭开 <b data-stat="scratch-pct">0%</b></div>
+        <div>回合 <b data-stat="scratch-round">1</b>/5</div>
+        <div>得分 <b data-stat="scratch-score">0</b></div>
+        <div>擦除 <b data-stat="scratch-pct">0%</b></div>
+        <div>尝试 <b data-stat="scratch-attempts">0</b></div>
       </div>
       <div class="stage-wrap">
         <div class="scratch-stage">
-          <div class="scratch-img" id="scratch-img"></div>
-          <canvas class="scratch-canvas" id="scratch-canvas"></canvas>
-          <div class="scratch-percent" id="scratch-percent">0%</div>
+          <div class="scratch-instructions" id="scratch-phase">准备记忆闪现</div>
+          <div class="scratch-memory-row" id="scratch-memory-options"></div>
+          <div class="scratch-target-label">擦除下方图片后，从上方翻面卡片中选择匹配照片</div>
+          <div class="scratch-scrub-wrap">
+            <div class="scratch-img" id="scratch-img"></div>
+            <canvas class="scratch-canvas" id="scratch-canvas"></canvas>
+            <div class="scratch-percent" id="scratch-percent">0%</div>
+          </div>
+          <div class="scratch-result" id="scratch-result" aria-live="polite"></div>
         </div>
       </div>
-      <div class="footnote">涂抹银色区域揭开写真 · 揭开 80% 以上即算成功</div>
+      <div class="footnote">先记住快速闪过的照片，再擦除局部并匹配 · 擦得越少、点错越少，得分越高</div>
     </section>
 
     <!-- ===== 2048 ===== -->
@@ -866,6 +889,10 @@ function preloadImage(cb) {
   img.onload = () => { loadedImg = img; cb(img); };
 }
 
+function randomDengAsset() {
+  return DENG_ASSETS[Math.floor(Math.random() * DENG_ASSETS.length)];
+}
+
 /* ==================== Router / Tab Switcher ==================== */
 const tabs = $all('.tab');
 const views = $all('.view');
@@ -899,7 +926,7 @@ function initCurrentGame() {
 /* ==================== 1. PUZZLE ==================== */
 let pState = {
   size: 4, empty: 15, tiles: [], moves: 0, time: 0, timer: null,
-  playing: false, finished: false, shuffleSteps: 200
+  playing: false, finished: false, shuffleSteps: 200, assetUrl: IMG_URL
 };
 
 function initPuzzle() {
@@ -907,6 +934,7 @@ function initPuzzle() {
   const stage = $('#puzzle-stage');
   stage.classList.remove('done', 'peek');
   pState.moves = 0; pState.time = 0; pState.playing = false; pState.finished = false;
+  pState.assetUrl = randomDengAsset();
   updatePuzzleStats();
 
   preloadImage(img => {
@@ -970,7 +998,7 @@ function renderPuzzleTiles() {
     tile.style.top = `calc(${r} * 100% / ${n} + 2px)`;
 
     const origR = Math.floor(val / n), origC = val % n;
-    tile.style.backgroundImage = `url(${IMG_URL})`;
+    tile.style.backgroundImage = `url(${pState.assetUrl || IMG_URL})`;
     tile.style.backgroundSize = `${n * 100}% ${n * 100}%`;
     tile.style.backgroundPosition = `${origC * pct}% ${origR * pct}%`;
 
@@ -985,7 +1013,7 @@ function renderPuzzleTiles() {
 }
 
 function setupPuzzleReveal(img) {
-  $('#puzzle-reveal').style.backgroundImage = `url(${IMG_URL})`;
+  $('#puzzle-reveal').style.backgroundImage = `url(${pState.assetUrl || IMG_URL})`;
 }
 
 function movePuzzleTile(idx) {
@@ -1043,11 +1071,8 @@ function initMemory() {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, 400, 400);
 
-    let items = [];
-    for (let i = 0; i < mState.pairsCount; i++) {
-      // create distinct crops
-      items.push(i, i);
-    }
+    const chosenAssets = Array.from({ length: 15 }, (_, index) => index).sort(() => Math.random() - .5).slice(0, mState.pairsCount);
+    let items = chosenAssets.flatMap(assetIndex => [assetIndex, assetIndex]);
     // shuffle
     for (let i = items.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -1063,12 +1088,10 @@ function initMemory() {
           <div class="face face-back"></div>
         </div>
       `;
-          // render crop
-      const back = card.querySelector('.face-back');
-      const r = Math.floor(id / 3), c = id % 3;
-      back.style.backgroundImage = `url(${IMG_URL})`;
-      back.style.backgroundSize = `300% 300%`;
-      back.style.backgroundPosition = `${c * 50}% ${r * 50}%`;
+          const back = card.querySelector('.face-back');
+      back.style.backgroundImage = `url(${DENG_ASSETS[id] || IMG_URL})`;
+      back.style.backgroundSize = 'cover';
+      back.style.backgroundPosition = 'center';
 
       card.onclick = () => flipMemoryCard(card, id);
       grid.appendChild(card);
@@ -1123,12 +1146,13 @@ function updateMemoryStats() {
 
 /* ==================== 3. JIGSAW ==================== */
 let jState = {
-  size: 4, tiles: [], selected: null, moves: 0, time: 0, timer: null, playing: false, finished: false
+  size: 4, tiles: [], selected: null, moves: 0, time: 0, timer: null, playing: false, finished: false, assetUrl: IMG_URL
 };
 
 function initJigsaw() {
   stopAllTimers();
   jState.moves = 0; jState.time = 0; jState.playing = false; jState.finished = false;
+  jState.assetUrl = randomDengAsset();
   jState.selected = null;
   updateJigsawStats();
 
@@ -1170,7 +1194,7 @@ function renderJigsawTiles() {
     if (jState.selected === idx) piece.classList.add('selected');
 
     const origR = Math.floor(val / n), origC = val % n;
-    piece.style.backgroundImage = `url(${IMG_URL})`;
+    piece.style.backgroundImage = `url(${jState.assetUrl || IMG_URL})`;
     piece.style.backgroundSize = `${n * 100}% ${n * 100}%`;
     piece.style.backgroundPosition = `${origC * pct}% ${origR * pct}%`;
 
@@ -1215,15 +1239,19 @@ function updateJigsawStats() {
 
 /* ==================== 4. SPOTDIFF ==================== */
 let sState = {
-  diffCount: 3, diffs: [], found: [], time: 0, timer: null, playing: false, finished: false
+  diffCount: 3, diffs: [], found: [], time: 0, timer: null, playing: false, finished: false, assetUrl: IMG_URL
 };
 
 function initSpotdiff() {
   stopAllTimers();
   sState.found = []; sState.time = 0; sState.playing = false; sState.finished = false;
+  sState.assetUrl = randomDengAsset();
   updateSpotdiffStats();
 
-  preloadImage(img => {
+  const spotImage = new Image();
+  spotImage.src = sState.assetUrl;
+  spotImage.onload = () => {
+    const img = spotImage;
     const leftPane = $('#spotdiff-left');
     const rightPane = $('#spotdiff-right');
     const canvasL = leftPane.querySelector('canvas');
@@ -1299,7 +1327,7 @@ function initSpotdiff() {
         }
       });
     };
-  });
+  };
 }
 
 function updateSpotdiffStats() {
@@ -1308,74 +1336,206 @@ function updateSpotdiffStats() {
 }
 
 /* ==================== 5. SCRATCH ==================== */
-let scState = { active: false, pct: 0, finished: false };
-function initScratch() {
-  stopAllTimers();
-  scState.active = false; scState.pct = 0; scState.finished = false;
-  $('[data-stat="scratch-pct"]').textContent = '0%';
-  $('#scratch-percent').textContent = '0%';
-  $('#scratch-img').style.backgroundImage = `url(${IMG_URL})`;
+let scState = { active: false, pct: 0, finished: false, phase: 'idle', round: 1, totalRounds: 5, score: 0, attempts: 0, target: -1, options: [], flashTimer: null, calcTimer: null, roundComplete: false };
+function randomDengAssetIndex(exclude = []) {
+  const pool = DENG_ASSETS.map((_, index) => index).filter(index => !exclude.includes(index));
+  return pool[Math.floor(Math.random() * pool.length)] ?? 0;
+}
+
+function shuffleScratchOptions(values) {
+  const result = [...values];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function updateScratchStats() {
+  $('[data-stat="scratch-round"]').textContent = scState.round;
+  $('[data-stat="scratch-score"]').textContent = scState.score;
+  $('[data-stat="scratch-pct"]').textContent = `${scState.pct}%`;
+  $('[data-stat="scratch-attempts"]').textContent = scState.attempts;
+  $('#scratch-percent').textContent = `${scState.pct}%`;
+}
+
+function setupScratchCanvas(assetUrl) {
+  const wrap = $('.scratch-scrub-wrap');
   const canvas = $('#scratch-canvas');
   const ctx = canvas.getContext('2d');
-  const rect = canvas.parentNode.getBoundingClientRect();
-  canvas.width = rect.width || 500;
-  canvas.height = rect.height || 500;
+  const rect = wrap.getBoundingClientRect();
+  canvas.width = Math.max(260, Math.floor(rect.width || 560));
+  canvas.height = Math.max(150, Math.floor(rect.height || 315));
+  $('#scratch-img').style.backgroundImage = `url(${assetUrl})`;
+  ctx.globalCompositeOperation = 'source-over';
   ctx.fillStyle = '#b5b5b5';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  // Add some noise to make it look like silver scratch layer
-  for(let i=0; i<500; i++) {
-    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.1})`;
-    ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
+  for (let i = 0; i < 900; i++) {
+    ctx.fillStyle = `rgba(${180 + Math.random() * 60},${180 + Math.random() * 60},${180 + Math.random() * 60},${.18 + Math.random() * .26})`;
+    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2 + Math.random() * 3, 2 + Math.random() * 3);
   }
+  ctx.fillStyle = 'rgba(255,255,255,.14)';
+  ctx.font = `${Math.max(16, canvas.width / 18)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('SCRATCH TO REVEAL', canvas.width / 2, canvas.height / 2);
+  canvas.style.opacity = '1';
+}
 
-  const handleMove = (e) => {
-    if (scState.finished) return;
-    const r = canvas.getBoundingClientRect();
-    const x = (e.clientX || e.touches[0].clientX) - r.left;
-    const y = (e.clientY || e.touches[0].clientY) - r.top;
-      ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(x, y, 25, 0, Math.PI * 2);
-    ctx.fill();
-      if (!scState.active) {
-      scState.active = true;
-      const checkInterval = setInterval(() => {
-        if (scState.finished) { clearInterval(checkInterval); return; }
-        calcScratchPercent();
-      }, 500);
-    }
+function renderScratchOptions(revealed = false) {
+  const row = $('#scratch-memory-options');
+  row.innerHTML = '';
+  row.style.gridTemplateColumns = `repeat(${scState.options.length}, minmax(0, 1fr))`;
+  scState.options.forEach((assetIndex, index) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'scratch-memory-card';
+    card.dataset.optionIndex = index;
+    card.innerHTML = `<span class="scratch-memory-card-inner"><span class="scratch-memory-face front"></span><span class="scratch-memory-face back"></span></span>`;
+    card.querySelector('.scratch-memory-face.back').style.backgroundImage = `url(${DENG_ASSETS[assetIndex]})`;
+    if (revealed) card.classList.add('revealed');
+    card.onclick = () => selectScratchOption(index);
+    row.appendChild(card);
+  });
+}
+
+function initScratch() {
+  stopAllTimers();
+  scState = { active: false, pct: 0, finished: false, phase: 'idle', round: 1, totalRounds: 5, score: 0, attempts: 0, target: -1, options: [], flashTimer: null, calcTimer: null, roundComplete: false };
+  $('#scratch-next').style.display = 'none';
+  $('#scratch-result').textContent = '';
+  const scratchCanvas = $('#scratch-canvas');
+  scratchCanvas.onpointerdown = event => {
+    if (scState.phase !== 'play') return;
+    scratchCanvas.setPointerCapture?.(event.pointerId);
+    handleScratchMove(event);
   };
+  scratchCanvas.onpointermove = event => {
+    if (scState.phase === 'play' && (event.buttons > 0 || event.pointerType === 'touch')) handleScratchMove(event);
+  };
+  scratchCanvas.onpointerup = event => scratchCanvas.releasePointerCapture?.(event.pointerId);
+  scratchCanvas.onpointercancel = event => scratchCanvas.releasePointerCapture?.(event.pointerId);
+  startScratchRound();
+}
 
-  canvas.onmousedown = () => canvas.onmousemove = handleMove;
-  window.onmouseup = () => canvas.onmousemove = null;
-  canvas.ontouchmove = (e) => { e.preventDefault(); handleMove(e); };
+function startScratchRound() {
+  clearTimeout(scState.flashTimer);
+  clearInterval(scState.calcTimer);
+  scState.phase = 'flash';
+  scState.active = false;
+  scState.roundComplete = false;
+  scState.pct = 0;
+  scState.attempts = 0;
+  scState.target = randomDengAssetIndex();
+  const optionCount = scState.round >= 4 ? 5 : 4;
+  const decoys = [];
+  while (decoys.length < optionCount - 1) {
+    const next = randomDengAssetIndex([scState.target, ...decoys]);
+    if (!decoys.includes(next)) decoys.push(next);
+  }
+  scState.options = shuffleScratchOptions([scState.target, ...decoys]);
+  updateScratchStats();
+  $('#scratch-next').style.display = 'none';
+  $('#scratch-result').textContent = '';
+  $('#scratch-phase').textContent = `第 ${scState.round} / ${scState.totalRounds} 回合：记住上方快速闪现的照片`;
+  renderScratchOptions(true);
+  setupScratchCanvas(DENG_ASSETS[scState.target]);
+  scState.flashTimer = setTimeout(() => {
+    scState.phase = 'play';
+    renderScratchOptions(false);
+    $('#scratch-phase').textContent = '擦除下方局部照片，再从上方翻面卡片中选择匹配项';
+  }, 2300);
+}
+
+function handleScratchMove(event) {
+  if (scState.phase !== 'play' || scState.roundComplete) return;
+  event.preventDefault();
+  const canvas = $('#scratch-canvas');
+  const rect = canvas.getBoundingClientRect();
+  const point = event.touches?.[0] || event;
+  const x = point.clientX - rect.left;
+  const y = point.clientY - rect.top;
+  const ctx = canvas.getContext('2d');
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = 'rgba(0,0,0,1)';
+  ctx.beginPath();
+  ctx.arc(x, y, Math.max(18, rect.width / 20), 0, Math.PI * 2);
+  ctx.fill();
+  if (!scState.active) {
+    scState.active = true;
+    scState.calcTimer = setInterval(calcScratchPercent, 260);
+  }
+  calcScratchPercent();
 }
 
 function calcScratchPercent() {
   const canvas = $('#scratch-canvas');
+  if (!canvas || scState.phase !== 'play') return;
   const ctx = canvas.getContext('2d');
-  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
   let transparent = 0;
-  for (let i = 3; i < imgData.length; i += 4) {
-    if (imgData[i] === 0) transparent++;
-  }
-  const pct = Math.floor((transparent / (canvas.width * canvas.height)) * 100);
-  scState.pct = pct;
-  $('[data-stat="scratch-pct"]').textContent = pct + '%';
-  $('#scratch-percent').textContent = pct + '%';
-  if (pct > 80 && !scState.finished) {
-    scState.finished = true;
-    canvas.style.transition = 'opacity 0.8s';
-    canvas.style.opacity = '0';
-    setTimeout(() => alert('恭喜！你已完整揭开这张精美写真！'), 500);
+  for (let i = 3; i < data.length; i += 16) if (data[i] < 40) transparent++;
+  scState.pct = Math.min(100, Math.floor((transparent / Math.ceil(data.length / 16)) * 100));
+  updateScratchStats();
+}
+
+function selectScratchOption(index) {
+  if (scState.phase !== 'play' || scState.roundComplete) return;
+  scState.attempts++;
+  updateScratchStats();
+  const cards = $all('.scratch-memory-card');
+  const card = cards[index];
+  card.classList.add('revealed');
+  if (scState.options[index] === scState.target) {
+    scState.roundComplete = true;
+    scState.phase = 'result';
+    clearInterval(scState.calcTimer);
+    const penalty = Math.max(0, scState.attempts - 1) * 130;
+    const roundScore = Math.max(80, 900 - scState.pct * 6 - penalty);
+    scState.score += roundScore;
+    updateScratchStats();
+    $('#scratch-result').textContent = `${scState.attempts === 1 ? '眼力大师！' : '记忆锁定！'} 本轮 +${roundScore} 分 · 擦除 ${scState.pct}% · 尝试 ${scState.attempts} 次`;
+    $('#scratch-phase').textContent = '匹配成功！观察擦除比例和尝试次数，你的评分已结算';
+    $('#scratch-next').style.display = 'inline-flex';
+    setTimeout(() => card.classList.add('correct'), 40);
+  } else {
+    card.classList.add('wrong');
+    $('#scratch-result').textContent = `不是这一张，再观察局部特征（第 ${scState.attempts} 次尝试）`;
+    setTimeout(() => card.classList.remove('wrong', 'revealed'), 650);
+    if (scState.attempts >= 4) {
+      scState.roundComplete = true;
+      scState.phase = 'result';
+      clearInterval(scState.calcTimer);
+      cards.forEach((item, idx) => { if (scState.options[idx] === scState.target) item.classList.add('revealed', 'correct'); });
+      scState.score += 80;
+      $('#scratch-result').textContent = `正确答案已揭晓 · 本轮保底 +80 分 · 总分 ${scState.score}`;
+      $('#scratch-phase').textContent = '本轮结束，记住正确照片后继续下一轮';
+      $('#scratch-next').style.display = 'inline-flex';
+      updateScratchStats();
+    }
   }
 }
 
+function nextScratchRound() {
+  if (scState.phase !== 'result') return;
+  if (scState.round >= scState.totalRounds) {
+    scState.phase = 'done';
+    scState.finished = true;
+    $('#scratch-next').style.display = 'none';
+    $('#scratch-phase').textContent = `挑战完成！五轮总分 ${scState.score} 分`;
+    $('#scratch-result').textContent = scState.score >= 3000 ? '眼力与记忆力双满分！你是写真记忆大师。' : '完成挑战！再来一轮，争取擦得更少、点得更准。';
+    return;
+  }
+  scState.round++;
+  startScratchRound();
+}
+
+
 /* ==================== 6. 2048 ==================== */
-let g2State = { board: [], score: 0, best: 0, finished: false };
+let g2State = { board: [], score: 0, best: 0, finished: false, assetUrl: IMG_URL };
 function init2048() {
   stopAllTimers();
   g2State.board = Array(16).fill(0);
+  g2State.assetUrl = randomDengAsset();
   g2State.score = 0; g2State.finished = false;
   addRandomTile2048();
   addRandomTile2048();
@@ -1399,7 +1559,7 @@ function render2048() {
     if (val) {
       const img = document.createElement('div');
       img.className = 'tile-img';
-      img.style.backgroundImage = `url(${IMG_URL})`;
+      img.style.backgroundImage = `url(${g2State.assetUrl || IMG_URL})`;
       const level = Math.log2(val);
       img.style.filter = `blur(${Math.max(0, 10 - level * 2)}px) brightness(${0.5 + level * 0.1})`;
       const r = Math.floor((val % 16) / 4), c = val % 4;
@@ -1469,7 +1629,7 @@ function move2048(dir) {
 /* ==================== 5. NONOGRAM ==================== */
 let nState = {
   size: 8, solution: [], board: [], moves: 0, mistakes: 0,
-  hints: 3, time: 0, timer: null, playing: false, finished: false, wrongIndex: -1
+  hints: 3, time: 0, timer: null, playing: false, finished: false, wrongIndex: -1, assetUrl: IMG_URL
 };
 
 function getNonogramRuns(line) {
@@ -1522,13 +1682,16 @@ function initNonogram() {
   nState.playing = false;
   nState.finished = false;
   nState.wrongIndex = -1;
+  nState.assetUrl = randomDengAsset();
   updateNonogramStats();
 
-  preloadImage(img => {
-    nState.solution = buildNonogramSolution(img, nState.size);
+  const nonogramImage = new Image();
+  nonogramImage.src = nState.assetUrl;
+  nonogramImage.onload = () => {
+    nState.solution = buildNonogramSolution(nonogramImage, nState.size);
     nState.board = Array(nState.size * nState.size).fill(0);
     renderNonogram();
-  });
+  };
 }
 
 function renderNonogram() {
@@ -2779,6 +2942,8 @@ function stopAllTimers() {
   clearInterval(lState.timer);
   clearInterval(dState.timer);
   clearInterval(match3State.timer);
+  clearTimeout(scState.flashTimer);
+  clearInterval(scState.calcTimer);
 }
 
 // Difficulty buttons
@@ -2811,6 +2976,7 @@ $('[data-act="puzzle-peek"]').ontouchend = () => $('#puzzle-stage').classList.re
 $('[data-act="memory-reset"]').onclick = initMemory;
 
 $('[data-act="scratch-reset"]').onclick = initScratch;
+$('[data-act="scratch-next"]').onclick = nextScratchRound;
 $('[data-act="2048-reset"]').onclick = init2048;
 $('[data-act="nonogram-reset"]').onclick = initNonogram;
 $('[data-act="nonogram-hint"]').onclick = giveNonogramHint;
