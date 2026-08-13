@@ -383,7 +383,7 @@
   .match3-stage { width: min(100%, 620px); margin: 0 auto; display: flex; flex-direction: column; gap: 9px; }
   .match3-board-shell { width: 100%; padding: clamp(8px, 2.4vw, 14px); border: 1px solid rgba(217,70,239,.3); border-radius: 20px; background: linear-gradient(145deg, rgba(30,18,55,.95), rgba(15,23,42,.92)); box-shadow: inset 0 0 32px rgba(217,70,239,.08), 0 18px 45px rgba(0,0,0,.42); }
   .match3-board { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: clamp(3px, 1.2vw, 7px); width: 100%; aspect-ratio: 1 / 1; touch-action: none; }
-  .match3-tile { appearance: none; min-width: 0; min-height: 0; padding: 2px; border: 1px solid rgba(255,255,255,.1); border-radius: clamp(6px, 1.8vw, 11px); background: rgba(255,255,255,.055); cursor: pointer; overflow: hidden; transition: transform .14s, filter .14s, border-color .14s, opacity .18s; touch-action: manipulation; }
+  .match3-tile { appearance: none; min-width: 0; min-height: 0; padding: 2px; border: 1px solid rgba(255,255,255,.1); border-radius: clamp(6px, 1.8vw, 11px); background: rgba(255,255,255,.055); cursor: pointer; overflow: hidden; transition: transform .14s, filter .14s, border-color .14s, opacity .18s; touch-action: none; }
   .match3-tile img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: clamp(4px, 1.4vw, 8px); pointer-events: none; }
   .match3-tile:hover { filter: brightness(1.12); transform: translateY(-2px); border-color: rgba(240,171,252,.9); }
   .match3-tile:active { transform: scale(.94); }
@@ -1948,6 +1948,8 @@ let match3State = {
   score: 0, moves: 0, combo: 0, time: 0, timer: null,
   playing: false, locked: false, finished: false
 };
+let match3Gesture = null;
+let match3SuppressClickUntil = 0;
 
 function match3Index(row, col) { return row * match3State.size + col; }
 function match3RandomType() { return Math.floor(Math.random() * match3State.types); }
@@ -2074,7 +2076,41 @@ function renderMatch3(matchSet = new Set()) {
     if (matchSet.has(index)) tile.classList.add('matching');
     if (value !== null) tile.appendChild(createDengImage(value));
     tile.setAttribute('aria-label', value === null ? '空格' : `第 ${Math.floor(index / match3State.size) + 1} 行第 ${(index % match3State.size) + 1} 列`);
-    tile.onclick = () => clickMatch3(index);
+
+    if (value !== null) {
+      tile.addEventListener('pointerdown', event => {
+        if (match3State.locked || match3State.finished) return;
+        match3Gesture = { index, x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+        tile.setPointerCapture?.(event.pointerId);
+      });
+      tile.addEventListener('pointerup', event => {
+        if (!match3Gesture || match3Gesture.index !== index) return;
+        const gesture = match3Gesture;
+        match3Gesture = null;
+        const dx = event.clientX - gesture.x;
+        const dy = event.clientY - gesture.y;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
+        event.preventDefault();
+        match3SuppressClickUntil = performance.now() + 350;
+        const row = Math.floor(index / match3State.size);
+        const col = index % match3State.size;
+        let targetRow = row;
+        let targetCol = col;
+        if (Math.abs(dx) >= Math.abs(dy)) targetCol += dx > 0 ? 1 : -1;
+        else targetRow += dy > 0 ? 1 : -1;
+        if (targetRow < 0 || targetRow >= match3State.size || targetCol < 0 || targetCol >= match3State.size) return;
+        const target = targetRow * match3State.size + targetCol;
+        if (match3State.board[target] === null) return;
+        match3State.selected = -1;
+        clickMatch3(index);
+        clickMatch3(target);
+      });
+      tile.addEventListener('pointercancel', () => { match3Gesture = null; });
+    }
+    tile.onclick = () => {
+      if (performance.now() < match3SuppressClickUntil) return;
+      clickMatch3(index);
+    };
     board.appendChild(tile);
   });
 }
