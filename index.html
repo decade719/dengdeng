@@ -469,6 +469,37 @@
     .nonogram-tip { font-size: 11px; }
   }
 
+  /* ===== link-up ===== */
+  #view-linkup { overflow-y: auto; overflow-x: hidden; padding: 0 4px 12px; }
+  #view-linkup .topbar { width: 100%; gap: 7px; margin-bottom: 8px; }
+  #view-linkup .diff { flex: 0 0 auto; }
+  .linkup-stage { width: min(96vw, 620px); display: flex; flex-direction: column; gap: 9px; }
+  .linkup-title { color: #fcd34d; font-size: clamp(18px, 4vw, 26px); font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 18px rgba(251,191,36,.35); }
+  .linkup-board-shell { position: relative; width: 100%; padding: clamp(8px, 2.4vw, 14px); border: 1px solid rgba(56,189,248,.24); border-radius: 20px; background: linear-gradient(145deg, rgba(15,23,42,.94), rgba(30,41,59,.84)); box-shadow: inset 0 0 32px rgba(56,189,248,.06), 0 18px 45px rgba(0,0,0,.42); }
+  .linkup-board { --link-cols: 6; --link-rows: 8; position: relative; display: grid; grid-template-columns: repeat(var(--link-cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--link-rows), minmax(0, 1fr)); gap: clamp(3px, 1.2vw, 7px); width: 100%; aspect-ratio: var(--link-cols) / var(--link-rows); }
+  .linkup-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 4; }
+  .linkup-lines polyline { fill: none; stroke: #67e8f9; stroke-width: .12; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 .14px #22d3ee) drop-shadow(0 0 .22px rgba(236,72,153,.9)); animation: linkup-line-pop .34s ease-out; }
+  @keyframes linkup-line-pop { from { opacity: 0; stroke-width: .02; } 45% { opacity: 1; } to { opacity: 1; stroke-width: .12; } }
+  .linkup-tile { appearance: none; min-width: 0; min-height: 0; padding: 2px; border: 1px solid rgba(255,255,255,.1); border-radius: clamp(6px, 1.8vw, 11px); background: rgba(255,255,255,.055); cursor: pointer; overflow: hidden; transition: transform .14s, filter .14s, border-color .14s, opacity .14s; touch-action: manipulation; }
+  .linkup-tile img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: clamp(4px, 1.4vw, 8px); pointer-events: none; }
+  .linkup-tile:hover { filter: brightness(1.12); transform: translateY(-2px); border-color: rgba(103,232,249,.85); }
+  .linkup-tile:active { transform: scale(.94); }
+  .linkup-tile.selected { border-color: #fbbf24; box-shadow: 0 0 0 2px rgba(251,191,36,.45), 0 0 18px rgba(251,191,36,.28); transform: scale(.94); }
+  .linkup-tile.empty { visibility: hidden; pointer-events: none; }
+  .linkup-tile.hint { animation: linkup-hint .7s ease-in-out 2; }
+  @keyframes linkup-hint { 50% { transform: scale(1.08); box-shadow: 0 0 0 3px rgba(52,211,153,.65), 0 0 24px rgba(52,211,153,.5); } }
+  .linkup-message { min-height: 22px; text-align: center; color: #a5f3fc; font-size: 13px; font-weight: 700; }
+  .linkup-message.success { color: #6ee7b7; }
+  .linkup-message.danger { color: #fda4af; }
+  @media (max-width: 520px) {
+    #view-linkup .topbar { justify-content: stretch; flex-wrap: wrap; }
+    #view-linkup .diff { flex: 1 1 100%; justify-content: center; }
+    #view-linkup .topbar > .btn { flex: 1 1 0; min-width: 0; padding: 8px 7px; }
+    #view-linkup .stats { justify-content: space-between; width: 100%; font-size: 12px; }
+    .linkup-stage { width: 100%; }
+    .linkup-message { font-size: 12px; }
+  }
+
   /* ===== deng-le-deng ===== */
   .deng-controls { flex-wrap: nowrap; gap: 5px; margin-bottom: 5px; }
   .deng-controls .diff { flex: 0 0 auto; }
@@ -663,7 +694,7 @@
       </section>
 
       <section class="home-metrics" aria-label="游戏站数据">
-        <div class="metric"><strong>08</strong><span>款小游戏</span></div>
+        <div class="metric"><strong>09</strong><span>款小游戏</span></div>
         <div class="metric"><strong>01</strong><span>主打挑战</span></div>
         <div class="metric"><strong>100%</strong><span>无需安装</span></div>
       </section>
@@ -686,6 +717,7 @@
           <a class="game-card" data-category="relax" href="app.html?game=scratch" style="--grad:linear-gradient(135deg,#ec4899,#be185d)"><div class="game-card-top"><div class="game-icon">🎁</div><span class="game-status">解压</span></div><div class="game-name">心动刮刮乐</div><div class="game-desc">擦去覆盖层，一点点揭开隐藏照片。</div><div class="game-tags"><span class="game-tag">互动</span><span class="game-tag">惊喜</span></div></a>
           <a class="game-card" data-category="logic" href="app.html?game=2048" style="--grad:linear-gradient(135deg,#f97316,#c2410c)"><div class="game-card-top"><div class="game-icon">🎲</div><span class="game-status">连击</span></div><div class="game-name">写真 2048</div><div class="game-desc">滑动合并相同碎片，逐步解锁更清晰的画面。</div><div class="game-tags"><span class="game-tag">合并</span><span class="game-tag">数字</span></div></a>
           <a class="game-card" data-category="logic" href="app.html?game=nonogram" style="--grad:linear-gradient(135deg,#06b6d4,#0e7490)"><div class="game-card-top"><div class="game-icon">🔢</div><span class="game-status">动脑</span></div><div class="game-name">数织解谜</div><div class="game-desc">根据行列数字推导格子，揭开隐藏图案。</div><div class="game-tags"><span class="game-tag">数织</span><span class="game-tag">推理</span></div></a>
+          <a class="game-card" data-category="memory" href="app.html?game=linkup" style="--grad:linear-gradient(135deg,#22d3ee,#7c3aed)"><div class="game-card-top"><div class="game-icon">🔗</div><span class="game-status">新上线</span></div><div class="game-name">蹬蹬连连看</div><div class="game-desc">复用蹬了个蹬素材，连接相同照片，最多两次转弯即可消除。</div><div class="game-tags"><span class="game-tag">连连看</span><span class="game-tag">找路线</span></div></a>
         </div>
       </section>
 
@@ -870,6 +902,35 @@
       </div>
     </div>
 
+    <!-- ===== LINK-UP ===== -->
+    <section class="view" id="view-linkup">
+      <div class="linkup-title">蹬蹬连连看</div>
+      <div class="topbar">
+        <div class="diff" data-diff-for="linkup">
+          <button data-d="1" class="active">轻松 6×8</button>
+          <button data-d="2">挑战 8×10</button>
+        </div>
+        <button class="btn primary" data-act="linkup-reset">重新开始</button>
+        <button class="btn" data-act="linkup-hint">提示 <span data-stat="linkup-hints">3</span></button>
+        <button class="btn warn" data-act="linkup-shuffle">洗牌 <span data-stat="linkup-shuffles">3</span></button>
+      </div>
+      <div class="stats">
+        <div>剩余 <b data-stat="linkup-left">48</b></div>
+        <div>步数 <b data-stat="linkup-moves">0</b></div>
+        <div>用时 <b data-stat="linkup-time">00:00</b></div>
+      </div>
+      <div class="stage-wrap">
+        <div class="linkup-stage">
+          <div class="linkup-board-shell">
+            <svg class="linkup-lines" id="linkup-lines" viewBox="-0.5 -0.5 7 9" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="linkup-board" id="linkup-board"></div>
+          </div>
+          <div class="linkup-message" id="linkup-message">蹬蹬连连看：点击两张相同照片连线消除</div>
+        </div>
+      </div>
+      <div class="footnote">蹬蹬连连看 · 相同图片最多转弯两次即可消除</div>
+    </section>
+
     <!-- ===== NONOGRAM ===== -->
     <section class="view" id="view-nonogram">
       <div class="topbar">
@@ -957,6 +1018,7 @@ function initCurrentGame() {
   else if (currentGame === 'scratch') initScratch();
   else if (currentGame === '2048') init2048();
   else if (currentGame === 'nonogram') initNonogram();
+  else if (currentGame === 'linkup') initLinkup();
   else if (currentGame === 'deng') initDeng();
 }
 
@@ -1718,7 +1780,266 @@ function giveNonogramHint() {
   checkNonogramComplete();
 }
 
-/* ==================== 6. DENG LE DENG ==================== */
+/* ==================== 6. LINK-UP ==================== */
+let lState = {
+  level: 1, rows: 8, cols: 6, board: [], first: -1, matched: 0,
+  moves: 0, mistakes: 0, hints: 3, shuffles: 3, time: 0, timer: null,
+  playing: false, finished: false, locked: false
+};
+
+const LINK_LEVELS = {
+  1: { rows: 8, cols: 6 },
+  2: { rows: 10, cols: 8 }
+};
+
+function shuffleList(list) {
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
+
+function updateLinkStats() {
+  $('[data-stat="linkup-left"]').textContent = lState.board.filter(value => value !== -1).length;
+  $('[data-stat="linkup-moves"]').textContent = lState.moves;
+  $('[data-stat="linkup-time"]').textContent = fmtTime(lState.time);
+  $('[data-stat="linkup-hints"]').textContent = lState.hints;
+  $('[data-stat="linkup-shuffles"]').textContent = lState.shuffles;
+}
+
+function setLinkMessage(text, type = '') {
+  const el = $('#linkup-message');
+  el.textContent = text;
+  el.className = `linkup-message${type ? ` ${type}` : ''}`;
+}
+
+function startLinkTimer() {
+  if (lState.playing) return;
+  lState.playing = true;
+  lState.timer = setInterval(() => {
+    lState.time++;
+    updateLinkStats();
+  }, 1000);
+}
+
+function createLinkPairs(total) {
+  const pairs = [];
+  for (let i = 0; i < total / 2; i++) pairs.push(i % DENG_ASSETS.length, i % DENG_ASSETS.length);
+  return shuffleList(pairs);
+}
+
+function initLinkup() {
+  stopAllTimers();
+  const config = LINK_LEVELS[lState.level] || LINK_LEVELS[1];
+  lState.rows = config.rows;
+  lState.cols = config.cols;
+  lState.board = createLinkPairs(lState.rows * lState.cols);
+  let layoutAttempts = 0;
+  while (!findLinkPair() && layoutAttempts < 40) {
+    lState.board = createLinkPairs(lState.rows * lState.cols);
+    layoutAttempts++;
+  }
+  lState.first = -1;
+  lState.matched = 0;
+  lState.moves = 0;
+  lState.mistakes = 0;
+  lState.hints = 3;
+  lState.shuffles = 3;
+  lState.time = 0;
+  lState.playing = false;
+  lState.finished = false;
+  lState.locked = false;
+  renderLinkup();
+  updateLinkStats();
+  setLinkMessage('蹬蹬连连看：点击两张相同照片连线消除');
+}
+
+function linkGrid() {
+  const grid = Array.from({ length: lState.rows + 2 }, () => Array(lState.cols + 2).fill(-1));
+  for (let row = 0; row < lState.rows; row++) {
+    for (let col = 0; col < lState.cols; col++) grid[row + 1][col + 1] = lState.board[row * lState.cols + col];
+  }
+  return grid;
+}
+
+function linkSegmentClear(grid, a, b) {
+  if (a.r !== b.r && a.c !== b.c) return false;
+  if (a.r === b.r) {
+    const step = a.c < b.c ? 1 : -1;
+    for (let col = a.c + step; col !== b.c; col += step) if (grid[a.r][col] !== -1) return false;
+  } else {
+    const step = a.r < b.r ? 1 : -1;
+    for (let row = a.r + step; row !== b.r; row += step) if (grid[row][a.c] !== -1) return false;
+  }
+  return true;
+}
+
+function linkPathIsClear(grid, points) {
+  for (let i = 1; i < points.length - 1; i++) {
+    if (grid[points[i].r][points[i].c] !== -1) return false;
+  }
+  for (let i = 1; i < points.length; i++) {
+    if (!linkSegmentClear(grid, points[i - 1], points[i])) return false;
+  }
+  return true;
+}
+
+function linkPathFor(firstIndex, secondIndex) {
+  if (firstIndex === secondIndex || lState.board[firstIndex] < 0 || lState.board[firstIndex] !== lState.board[secondIndex]) return null;
+  const grid = linkGrid();
+  const a = { r: Math.floor(firstIndex / lState.cols) + 1, c: firstIndex % lState.cols + 1 };
+  const b = { r: Math.floor(secondIndex / lState.cols) + 1, c: secondIndex % lState.cols + 1 };
+  if (a.r === b.r || a.c === b.c) {
+    const direct = [a, b];
+    if (linkPathIsClear(grid, direct)) return direct;
+  }
+  const oneTurn = [
+    [a, { r: a.r, c: b.c }, b],
+    [a, { r: b.r, c: a.c }, b]
+  ];
+  for (const path of oneTurn) if (linkPathIsClear(grid, path)) return path;
+  for (let row = 0; row < lState.rows + 2; row++) {
+    const path = [a, { r: row, c: a.c }, { r: row, c: b.c }, b];
+    if (linkPathIsClear(grid, path)) return path;
+  }
+  for (let col = 0; col < lState.cols + 2; col++) {
+    const path = [a, { r: a.r, c: col }, { r: b.r, c: col }, b];
+    if (linkPathIsClear(grid, path)) return path;
+  }
+  return null;
+}
+
+function renderLinkup() {
+  const board = $('#linkup-board');
+  board.style.setProperty('--link-cols', lState.cols);
+  board.style.setProperty('--link-rows', lState.rows);
+  board.innerHTML = '';
+  const lines = $('#linkup-lines');
+  lines.setAttribute('viewBox', `-0.5 -0.5 ${lState.cols + 1} ${lState.rows + 1}`);
+  for (let index = 0; index < lState.board.length; index++) {
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'linkup-tile';
+    tile.setAttribute('aria-label', `第 ${Math.floor(index / lState.cols) + 1} 行第 ${index % lState.cols + 1} 列`);
+    if (lState.board[index] === -1) {
+      tile.classList.add('empty');
+      tile.disabled = true;
+    } else {
+      const image = createDengImage(lState.board[index]);
+      image.className = 'linkup-image';
+      tile.appendChild(image);
+      tile.onclick = () => handleLinkCell(index);
+      if (index === lState.first) tile.classList.add('selected');
+    }
+    board.appendChild(tile);
+  }
+}
+
+function drawLinkPath(path) {
+  const lines = $('#linkup-lines');
+  lines.innerHTML = '';
+  const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  polyline.setAttribute('points', path.map(point => `${point.c - 0.5},${point.r - 0.5}`).join(' '));
+  lines.appendChild(polyline);
+  setTimeout(() => { if (lines.contains(polyline)) polyline.remove(); }, 360);
+}
+
+function findLinkPair() {
+  const available = lState.board.map((value, index) => value === -1 ? -1 : index).filter(index => index >= 0);
+  for (let i = 0; i < available.length; i++) {
+    for (let j = i + 1; j < available.length; j++) {
+      const path = linkPathFor(available[i], available[j]);
+      if (path) return { first: available[i], second: available[j], path };
+    }
+  }
+  return null;
+}
+
+function handleLinkCell(index) {
+  if (lState.locked || lState.finished || lState.board[index] === -1) return;
+  startLinkTimer();
+  if (lState.first === -1) {
+    lState.first = index;
+    renderLinkup();
+    setLinkMessage('再点击一张相同图片，看看能否连通');
+    return;
+  }
+  if (index === lState.first) {
+    lState.first = -1;
+    renderLinkup();
+    setLinkMessage('选择已取消，点击一张图片开始');
+    return;
+  }
+  const first = lState.first;
+  const path = linkPathFor(first, index);
+  lState.moves++;
+  if (!path) {
+    lState.mistakes++;
+    lState.first = index;
+    renderLinkup();
+    updateLinkStats();
+    setLinkMessage('这两张暂时连不上，换一条路线试试', 'danger');
+    return;
+  }
+  lState.locked = true;
+  lState.board[first] = -1;
+  lState.board[index] = -1;
+  lState.first = -1;
+  lState.matched += 2;
+  drawLinkPath(path);
+  updateLinkStats();
+  setLinkMessage('连通成功！', 'success');
+  setTimeout(() => {
+    renderLinkup();
+    lState.locked = false;
+    if (lState.matched >= lState.rows * lState.cols) {
+      lState.finished = true;
+      stopAllTimers();
+      setLinkMessage(`全部消除！用时 ${fmtTime(lState.time)}，共走 ${lState.moves} 步`, 'success');
+    } else if (!findLinkPair()) {
+      setLinkMessage('当前没有可连的组合，点击洗牌继续挑战', 'danger');
+    }
+  }, 360);
+}
+
+function giveLinkHint() {
+  if (lState.finished || lState.hints <= 0) return;
+  const pair = findLinkPair();
+  if (!pair) {
+    setLinkMessage('当前没有可连组合，请先洗牌', 'danger');
+    return;
+  }
+  lState.hints--;
+  lState.first = -1;
+  renderLinkup();
+  updateLinkStats();
+  const tiles = $('#linkup-board').children;
+  tiles[pair.first].classList.add('hint');
+  tiles[pair.second].classList.add('hint');
+  setLinkMessage('绿色闪烁的是一组可消除图片');
+}
+
+function shuffleLinkup() {
+  if (lState.finished || lState.locked || lState.shuffles <= 0) {
+    setLinkMessage(lState.shuffles <= 0 ? '洗牌次数已用完' : '这一局已经完成', 'danger');
+    return;
+  }
+  const positions = [];
+  const values = [];
+  lState.board.forEach((value, index) => {
+    if (value !== -1) { positions.push(index); values.push(value); }
+  });
+  shuffleList(values);
+  positions.forEach((position, index) => { lState.board[position] = values[index]; });
+  lState.shuffles--;
+  lState.first = -1;
+  renderLinkup();
+  updateLinkStats();
+  setLinkMessage('牌面已洗牌，重新寻找可以连通的组合');
+}
+
+/* ==================== 7. DENG LE DENG ==================== */
 let dState = {
   level: 1, tiles: [], tray: [], mistakes: 0, removed: 0,
   solutionOrder: [], solutionCursor: 0, processing: false, finished: false, timer: null
@@ -2070,6 +2391,7 @@ function stopAllTimers() {
   clearInterval(jState.timer);
   clearInterval(sState.timer);
   clearInterval(nState.timer);
+  clearInterval(lState.timer);
   clearInterval(dState.timer);
 }
 
@@ -2086,6 +2408,7 @@ $all('.diff').forEach(group => {
       else if (game === 'jigsaw') { jState.size = Math.sqrt(val); initJigsaw(); }
       else if (game === 'spotdiff') { sState.diffCount = val; initSpotdiff(); }
       else if (game === 'nonogram') { nState.size = val; initNonogram(); }
+      else if (game === 'linkup') { lState.level = val; initLinkup(); }
       else if (game === 'deng') { dState.level = val; initDeng(); }
     };
   });
@@ -2104,6 +2427,9 @@ $('[data-act="scratch-reset"]').onclick = initScratch;
 $('[data-act="2048-reset"]').onclick = init2048;
 $('[data-act="nonogram-reset"]').onclick = initNonogram;
 $('[data-act="nonogram-hint"]').onclick = giveNonogramHint;
+$('[data-act="linkup-reset"]').onclick = initLinkup;
+$('[data-act="linkup-hint"]').onclick = giveLinkHint;
+$('[data-act="linkup-shuffle"]').onclick = shuffleLinkup;
 $('[data-act="deng-reset"]').onclick = initDeng;
 $('[data-act="deng-hint"]').onclick = hintDeng;
 $('[data-act="deng-shuffle"]').onclick = openDengQuiz;
@@ -2162,7 +2488,7 @@ window.onkeydown = (e) => {
 function bootGamePage(initialGame) {
   const params = new URLSearchParams(location.search);
   const g = initialGame || params.get('game');
-  const validGames = ['puzzle', 'memory', 'jigsaw', 'spotdiff', 'scratch', '2048', 'nonogram', 'deng'];
+  const validGames = ['puzzle', 'memory', 'jigsaw', 'spotdiff', 'scratch', '2048', 'nonogram', 'linkup', 'deng'];
   switchGame(validGames.includes(g) ? g : 'puzzle', false);
 }
 window.bootGamePage = bootGamePage;
@@ -2182,7 +2508,7 @@ if (document.readyState === 'loading') {
       const body = document.getElementById('site-body');
       const embeddedStyle = document.getElementById('embedded-app-style');
       const embeddedScript = document.getElementById('embedded-game-script');
-      const validGames = ['puzzle', 'memory', 'jigsaw', 'spotdiff', 'scratch', '2048', 'nonogram', 'deng'];
+      const validGames = ['puzzle', 'memory', 'jigsaw', 'spotdiff', 'scratch', '2048', 'nonogram', 'linkup', 'deng'];
       let appBooted = false;
       let loaderTimer = 0;
 
