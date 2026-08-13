@@ -521,17 +521,33 @@
   #view-match3 .diff { flex: 0 0 auto; }
   .match3-title { color: #f0abfc; font-size: clamp(18px, 4vw, 26px); font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 0 18px rgba(217,70,239,.42); }
   .match3-stage { width: min(100%, 620px); margin: 0 auto; display: flex; flex-direction: column; gap: 9px; }
-  .match3-board-shell { width: 100%; padding: clamp(8px, 2.4vw, 14px); border: 1px solid rgba(217,70,239,.3); border-radius: 20px; background: linear-gradient(145deg, rgba(30,18,55,.95), rgba(15,23,42,.92)); box-shadow: inset 0 0 32px rgba(217,70,239,.08), 0 18px 45px rgba(0,0,0,.42); }
-  .match3-board { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: clamp(3px, 1.2vw, 7px); width: 100%; aspect-ratio: 1 / 1; touch-action: none; }
-  .match3-tile { appearance: none; min-width: 0; min-height: 0; padding: 2px; border: 1px solid rgba(255,255,255,.1); border-radius: clamp(6px, 1.8vw, 11px); background: rgba(255,255,255,.055); cursor: pointer; overflow: hidden; transition: transform .14s, filter .14s, border-color .14s, opacity .18s; touch-action: none; }
-  .match3-tile img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: clamp(4px, 1.4vw, 8px); pointer-events: none; }
+  .match3-goal { width: min(100%, 620px); margin: 0 auto 8px; padding: 7px 10px 8px; border: 1px solid rgba(240,171,252,.22); border-radius: 12px; background: rgba(217,70,239,.08); }
+  .match3-goal-label { display: flex; justify-content: space-between; gap: 8px; color: #f5d0fe; font-size: 11px; font-weight: 800; }
+  .match3-goal-track { height: 7px; margin-top: 5px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.1); box-shadow: inset 0 1px 2px rgba(0,0,0,.35); }
+  .match3-goal-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #d946ef, #f0abfc, #fbbf24); box-shadow: 0 0 14px rgba(217,70,239,.7); transition: width .35s ease-out; }
+  .match3-board-shell { position: relative; width: 100%; padding: clamp(8px, 2.4vw, 14px); border: 1px solid rgba(217,70,239,.3); border-radius: 20px; background: linear-gradient(145deg, rgba(30,18,55,.95), rgba(15,23,42,.92)); box-shadow: inset 0 0 32px rgba(217,70,239,.08), 0 18px 45px rgba(0,0,0,.42); }
+  .match3-board { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: clamp(3px, 1.2vw, 7px); width: 100%; aspect-ratio: 1 / 1; touch-action: none; }
+  .match3-effects { position: absolute; inset: 0; z-index: 6; overflow: visible; pointer-events: none; }
+  .match3-tile { appearance: none; min-width: 0; min-height: 0; padding: 2px; border: 1px solid rgba(255,255,255,.1); border-radius: clamp(6px, 1.8vw, 11px); background: rgba(255,255,255,.055); cursor: pointer; overflow: visible; transition: transform .16s cubic-bezier(.2,.8,.2,1), filter .16s, border-color .16s, opacity .18s; touch-action: none; }
+  .match3-tile img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: clamp(4px, 1.4vw, 8px); pointer-events: none; transition: filter .16s; }
   .match3-tile:hover { filter: brightness(1.12); transform: translateY(-2px); border-color: rgba(240,171,252,.9); }
   .match3-tile:active { transform: scale(.94); }
   .match3-tile.selected { border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251,191,36,.5), 0 0 20px rgba(251,191,36,.3); transform: scale(.92); }
-  .match3-tile.matching { animation: match3-pop .28s ease-in-out; border-color: #f0abfc; box-shadow: 0 0 0 3px rgba(217,70,239,.5), 0 0 25px rgba(217,70,239,.65); }
+  .match3-tile.matching { animation: match3-break .42s cubic-bezier(.2,.8,.2,1) forwards; border-color: #f0abfc; box-shadow: 0 0 0 3px rgba(217,70,239,.62), 0 0 30px rgba(217,70,239,.9); }
+  .match3-tile.matching img { filter: brightness(1.8) saturate(1.35); }
+  .match3-tile.falling { animation: match3-fall .4s cubic-bezier(.18,.84,.28,1) both; animation-delay: var(--fall-delay, 0ms); }
   .match3-tile.hint { animation: match3-hint .7s ease-in-out 2; }
   .match3-tile.empty { visibility: hidden; pointer-events: none; }
-  @keyframes match3-pop { 50% { transform: scale(1.12) rotate(3deg); filter: brightness(1.55) saturate(1.35); } }
+  @keyframes match3-break { 0% { transform: scale(1) rotate(0); opacity: 1; } 28% { transform: scale(1.14) rotate(-4deg); opacity: 1; } 58% { transform: scale(.78) rotate(8deg); filter: brightness(1.9) saturate(1.45); opacity: .72; } 100% { transform: scale(.18) rotate(18deg); filter: brightness(2.5) saturate(1.8); opacity: 0; } }
+  @keyframes match3-fall { from { transform: translateY(calc(-1 * var(--fall-distance, 100%))) scale(.86); opacity: .35; } 72% { transform: translateY(5%) scale(1.02); opacity: 1; } to { transform: translateY(0) scale(1); opacity: 1; } }
+  .match3-burst { position: absolute; width: 1px; height: 1px; transform: translate(-50%, -50%); }
+  .match3-shard { position: absolute; left: 0; top: 0; width: clamp(8px, 2.5vw, 15px); height: clamp(8px, 2.5vw, 15px); border-radius: 3px; background-size: cover; box-shadow: 0 0 8px rgba(240,171,252,.9); animation: match3-shard-fly .62s cubic-bezier(.15,.75,.3,1) forwards; animation-delay: var(--shard-delay, 0ms); }
+  @keyframes match3-shard-fly { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); } 45% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--shard-x)), calc(-50% + var(--shard-y))) scale(.18) rotate(var(--shard-rotate)); } }
+  .match3-result { position: absolute; inset: 10px; z-index: 9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px; border: 1px solid rgba(240,171,252,.55); border-radius: 16px; background: rgba(15,23,42,.88); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transform: scale(.94); transition: opacity .28s ease, transform .28s ease; text-align: center; }
+  .match3-result.active { opacity: 1; pointer-events: auto; transform: scale(1); }
+  .match3-result-burst { font-size: clamp(34px, 10vw, 56px); line-height: 1; filter: drop-shadow(0 0 16px rgba(240,171,252,.8)); }
+  .match3-result-title { color: #f0abfc; font-size: 22px; font-weight: 900; }
+  .match3-result-copy { color: #cbd5e1; font-size: 12px; line-height: 1.5; }
   @keyframes match3-hint { 50% { transform: scale(1.1); box-shadow: 0 0 0 3px rgba(52,211,153,.75), 0 0 24px rgba(52,211,153,.55); } }
   .match3-message { min-height: 22px; text-align: center; color: #f5d0fe; font-size: 13px; font-weight: 700; }
   .match3-message.success { color: #6ee7b7; }
@@ -958,14 +974,25 @@
       </div>
       <div class="stats">
         <div>分数 <b data-stat="match3-score">0</b></div>
-        <div>步数 <b data-stat="match3-moves">0</b></div>
+        <div>步数 <b data-stat="match3-moves">0</b>/<b data-stat="match3-max-moves">30</b></div>
         <div>连击 <b data-stat="match3-combo">0</b></div>
         <div>用时 <b data-stat="match3-time">00:00</b></div>
+      </div>
+      <div class="match3-goal">
+        <div class="match3-goal-label"><span>本局目标：达到 <b data-stat="match3-target">2000</b> 分</span><span><b data-stat="match3-goal-percent">0%</b></span></div>
+        <div class="match3-goal-track"><div class="match3-goal-fill" id="match3-goal-fill"></div></div>
       </div>
       <div class="stage-wrap">
         <div class="match3-stage">
           <div class="match3-board-shell">
             <div class="match3-board" id="match3-board"></div>
+            <div class="match3-effects" id="match3-effects"></div>
+            <div class="match3-result" id="match3-result">
+              <div class="match3-result-burst" id="match3-result-burst">🏆</div>
+              <div class="match3-result-title" id="match3-result-title">关卡完成！</div>
+              <div class="match3-result-copy" id="match3-result-copy">你已经达成目标。</div>
+              <button class="btn primary" data-act="match3-result-reset">再来一局</button>
+            </div>
           </div>
           <div class="match3-message" id="match3-message">交换相邻照片，让三张相同图片连成一线</div>
         </div>
@@ -2222,11 +2249,11 @@ function shuffleLinkup() {
 
 /* ==================== MATCH-3 ==================== */
 const MATCH3_LEVELS = {
-  1: { size: 8, types: 6 },
-  2: { size: 9, types: 7 }
+  1: { size: 8, types: 6, target: 800, maxMoves: 30 },
+  2: { size: 9, types: 7, target: 1800, maxMoves: 36 }
 };
 let match3State = {
-  level: 1, size: 8, types: 6, board: [], selected: -1,
+  level: 1, size: 8, types: 6, target: 800, maxMoves: 30, board: [], selected: -1,
   score: 0, moves: 0, combo: 0, time: 0, timer: null,
   playing: false, locked: false, finished: false
 };
@@ -2309,6 +2336,8 @@ function initMatch3() {
   const config = MATCH3_LEVELS[match3State.level] || MATCH3_LEVELS[1];
   match3State.size = config.size;
   match3State.types = config.types;
+  match3State.target = config.target;
+  match3State.maxMoves = config.maxMoves;
   match3State.board = createMatch3Board();
   match3State.selected = -1;
   match3State.score = 0;
@@ -2318,9 +2347,10 @@ function initMatch3() {
   match3State.playing = false;
   match3State.locked = false;
   match3State.finished = false;
+  $('#match3-result')?.classList.remove('active');
   updateMatch3Stats();
   renderMatch3();
-  setMatch3Message('交换相邻照片，让三张相同图片连成一线');
+  setMatch3Message(`交换相邻照片，${match3State.maxMoves} 步内达到目标分数`);
 }
 
 function startMatch3Timer() {
@@ -2335,8 +2365,14 @@ function startMatch3Timer() {
 function updateMatch3Stats() {
   $('[data-stat="match3-score"]').textContent = match3State.score;
   $('[data-stat="match3-moves"]').textContent = match3State.moves;
+  $('[data-stat="match3-max-moves"]').textContent = match3State.maxMoves;
   $('[data-stat="match3-combo"]').textContent = match3State.combo;
   $('[data-stat="match3-time"]').textContent = fmtTime(match3State.time);
+  $('[data-stat="match3-target"]').textContent = match3State.target;
+  const percent = Math.min(100, Math.round((match3State.score / match3State.target) * 100));
+  $('[data-stat="match3-goal-percent"]').textContent = `${percent}%`;
+  const fill = $('#match3-goal-fill');
+  if (fill) fill.style.width = `${percent}%`;
 }
 
 function setMatch3Message(text, type = '') {
@@ -2345,7 +2381,7 @@ function setMatch3Message(text, type = '') {
   node.className = `match3-message${type ? ` ${type}` : ''}`;
 }
 
-function renderMatch3(matchSet = new Set()) {
+function renderMatch3(matchSet = new Set(), fallingMap = new Map()) {
   const board = $('#match3-board');
   board.style.gridTemplateColumns = `repeat(${match3State.size}, minmax(0, 1fr))`;
   board.innerHTML = '';
@@ -2356,6 +2392,12 @@ function renderMatch3(matchSet = new Set()) {
     if (value === null) tile.classList.add('empty');
     if (index === match3State.selected) tile.classList.add('selected');
     if (matchSet.has(index)) tile.classList.add('matching');
+    if (fallingMap.has(index)) {
+      tile.classList.add('falling');
+      const fall = fallingMap.get(index);
+      tile.style.setProperty('--fall-distance', `${Math.max(1, fall.distance)}00%`);
+      tile.style.setProperty('--fall-delay', `${fall.delay}ms`);
+    }
     if (value !== null) tile.appendChild(createDengImage(value));
     tile.setAttribute('aria-label', value === null ? '空格' : `第 ${Math.floor(index / match3State.size) + 1} 行第 ${(index % match3State.size) + 1} 列`);
 
@@ -2429,33 +2471,92 @@ function clickMatch3(index) {
   if (!matches.size) {
     [match3State.board[first], match3State.board[index]] = [match3State.board[index], match3State.board[first]];
     renderMatch3();
-    setMatch3Message('这一步没有形成三连，换个方向试试', 'danger');
+    if (match3State.moves >= match3State.maxMoves) {
+      endMatch3(false);
+    } else {
+      setMatch3Message(`没有形成三连，还剩 ${match3State.maxMoves - match3State.moves} 步`, 'danger');
+    }
     return;
   }
   match3State.locked = true;
-  renderMatch3(matches);
-  setMatch3Message('漂亮！三连消除中…', 'success');
+  setMatch3Message('三连锁定！照片正在碎裂…', 'success');
   resolveMatch3(matches);
 }
 
 function collapseMatch3Board() {
   const size = match3State.size;
+  const falling = new Map();
   for (let col = 0; col < size; col++) {
     const kept = [];
     for (let row = size - 1; row >= 0; row--) {
       const value = match3State.board[row * size + col];
-      if (value !== null) kept.push(value);
+      if (value !== null) kept.push({ value, oldRow: row });
     }
     for (let row = size - 1, idx = 0; row >= 0; row--, idx++) {
-      match3State.board[row * size + col] = idx < kept.length ? kept[idx] : null;
-    }
-    for (let row = 0; row < size; row++) {
-      if (match3State.board[row * size + col] === null) match3State.board[row * size + col] = match3RandomType();
+      if (idx < kept.length) {
+        const item = kept[idx];
+        match3State.board[row * size + col] = item.value;
+        const distance = row - item.oldRow;
+        if (distance > 0) falling.set(row * size + col, { distance, delay: (size - 1 - row) * 18 });
+      } else {
+        match3State.board[row * size + col] = match3RandomType();
+        falling.set(row * size + col, { distance: row + 1, delay: (size - 1 - row) * 18 });
+      }
     }
   }
+  return falling;
 }
 
 function waitMatch3(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+function burstMatch3Tiles(matchSet) {
+  const layer = $('#match3-effects');
+  const board = $('#match3-board');
+  if (!layer || !board) return;
+  const layerRect = layer.getBoundingClientRect();
+  matchSet.forEach(index => {
+    const tile = board.children[index];
+    if (!tile || tile.classList.contains('empty')) return;
+    const rect = tile.getBoundingClientRect();
+    const burst = document.createElement('div');
+    burst.className = 'match3-burst';
+    burst.style.left = `${rect.left + rect.width / 2 - layerRect.left}px`;
+    burst.style.top = `${rect.top + rect.height / 2 - layerRect.top}px`;
+    const source = tile.querySelector('img')?.src || '';
+    for (let shardIndex = 0; shardIndex < 8; shardIndex++) {
+      const shard = document.createElement('span');
+      shard.className = 'match3-shard';
+      shard.style.backgroundImage = `url("${source}")`;
+      const angle = (Math.PI * 2 * shardIndex) / 8 + (Math.random() - .5) * .35;
+      const distance = 24 + Math.random() * 34;
+      shard.style.setProperty('--shard-x', `${Math.cos(angle) * distance}px`);
+      shard.style.setProperty('--shard-y', `${Math.sin(angle) * distance - 12}px`);
+      shard.style.setProperty('--shard-rotate', `${Math.round((Math.random() - .5) * 300)}deg`);
+      shard.style.setProperty('--shard-delay', `${Math.round(Math.random() * 50)}ms`);
+      burst.appendChild(shard);
+    }
+    layer.appendChild(burst);
+    setTimeout(() => burst.remove(), 760);
+  });
+}
+
+function showMatch3Result(win) {
+  match3State.finished = true;
+  match3State.locked = true;
+  stopAllTimers();
+  const result = $('#match3-result');
+  $('#match3-result-burst').textContent = win ? '🏆' : '⏳';
+  $('#match3-result-title').textContent = win ? '关卡完成！' : '步数用完了';
+  $('#match3-result-copy').textContent = win
+    ? `目标达成：${match3State.score} 分 · 隐藏写真已解锁`
+    : `本局 ${match3State.score} / ${match3State.target} 分，再试一次就能突破目标`;
+  result.classList.add('active');
+}
+
+function endMatch3(win) {
+  showMatch3Result(win);
+  setMatch3Message(win ? '太棒了！你完成了本局挑战' : '本局结束，点击再来一局重新挑战', win ? 'success' : 'danger');
+}
 
 async function resolveMatch3(initialMatches) {
   let matches = initialMatches;
@@ -2464,18 +2565,29 @@ async function resolveMatch3(initialMatches) {
     chain++;
     match3State.combo = chain;
     match3State.score += matches.size * 10 * chain;
-    matches.forEach(index => { match3State.board[index] = null; });
     updateMatch3Stats();
+    burstMatch3Tiles(matches);
     renderMatch3(matches);
-    await waitMatch3(220);
-    collapseMatch3Board();
+    await waitMatch3(440);
+    matches.forEach(index => { match3State.board[index] = null; });
     renderMatch3();
-    await waitMatch3(180);
+    await waitMatch3(70);
+    const falling = collapseMatch3Board();
+    renderMatch3(new Set(), falling);
+    await waitMatch3(480);
     matches = findMatch3Matches();
   }
   match3State.combo = 0;
   match3State.locked = false;
   updateMatch3Stats();
+  if (match3State.score >= match3State.target) {
+    endMatch3(true);
+    return;
+  }
+  if (match3State.moves >= match3State.maxMoves) {
+    endMatch3(false);
+    return;
+  }
   if (!findMatch3Move()) {
     shuffleMatch3(false);
     setMatch3Message('棋盘没有可消除组合，已自动洗牌', 'success');
@@ -2904,6 +3016,7 @@ $('[data-act="linkup-quiz-close"]').onclick = closeLinkQuiz;
 $('[data-act="match3-reset"]').onclick = initMatch3;
 $('[data-act="match3-hint"]').onclick = hintMatch3;
 $('[data-act="match3-shuffle"]').onclick = () => shuffleMatch3(true);
+$('[data-act="match3-result-reset"]').onclick = initMatch3;
 $('[data-act="deng-reset"]').onclick = initDeng;
 $('[data-act="deng-hint"]').onclick = hintDeng;
 $('[data-act="deng-shuffle"]').onclick = openDengQuiz;
