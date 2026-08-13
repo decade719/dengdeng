@@ -408,6 +408,13 @@
   .match3-result-burst { font-size: clamp(34px, 10vw, 56px); line-height: 1; filter: drop-shadow(0 0 16px rgba(240,171,252,.8)); }
   .match3-result-title { color: #f0abfc; font-size: 22px; font-weight: 900; }
   .match3-result-copy { color: #cbd5e1; font-size: 12px; line-height: 1.5; }
+  .match3-cheer { position: absolute; left: 50%; top: 48%; z-index: 8; width: max-content; max-width: 90%; pointer-events: none; text-align: center; opacity: 0; transform: translate(-50%, -50%) scale(.55) rotate(-4deg); }
+  .match3-cheer.show { animation: match3-cheer-pop .92s cubic-bezier(.15,.85,.25,1) both; }
+  .match3-cheer-en { color: #fbbf24; font-size: clamp(26px, 8vw, 54px); font-weight: 1000; letter-spacing: 1px; line-height: .95; text-shadow: 2px 2px 0 #7e22ce, 0 0 12px rgba(251,191,36,.9), 0 0 28px rgba(217,70,239,.7); }
+  .match3-cheer-cn { margin-top: 7px; color: #f0abfc; font-size: clamp(13px, 3.6vw, 21px); font-weight: 900; text-shadow: 0 0 12px rgba(240,171,252,.8); }
+  .match3-board-shell.combo-burst { animation: match3-shell-burst .28s ease-out; }
+  @keyframes match3-cheer-pop { 0% { opacity: 0; transform: translate(-50%, -40%) scale(.55) rotate(-8deg); } 18% { opacity: 1; transform: translate(-50%, -52%) scale(1.12) rotate(3deg); } 44% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-1deg); } 100% { opacity: 0; transform: translate(-50%, -78%) scale(.9) rotate(2deg); } }
+  @keyframes match3-shell-burst { 0%, 100% { transform: scale(1); filter: none; } 35% { transform: scale(1.012); filter: brightness(1.16) saturate(1.18); } }
   @keyframes match3-hint { 50% { transform: scale(1.1); box-shadow: 0 0 0 3px rgba(52,211,153,.75), 0 0 24px rgba(52,211,153,.55); } }
   .match3-message { min-height: 22px; text-align: center; color: #f5d0fe; font-size: 13px; font-weight: 700; }
   .match3-message.success { color: #6ee7b7; }
@@ -691,6 +698,7 @@
         <button class="btn primary" data-act="match3-reset">重新开始</button>
         <button class="btn" data-act="match3-hint">提示</button>
         <button class="btn warn" data-act="match3-shuffle">洗牌</button>
+        <button class="btn" data-act="match3-sound" aria-pressed="false" title="开关音效">🔊 音效</button>
       </div>
       <div class="stats">
         <div>分数 <b data-stat="match3-score">0</b></div>
@@ -707,6 +715,7 @@
           <div class="match3-board-shell">
             <div class="match3-board" id="match3-board"></div>
             <div class="match3-effects" id="match3-effects"></div>
+            <div class="match3-cheer" id="match3-cheer" aria-live="polite"><div class="match3-cheer-en"></div><div class="match3-cheer-cn"></div></div>
             <div class="match3-result" id="match3-result">
               <div class="match3-result-burst" id="match3-result-burst">🏆</div>
               <div class="match3-result-title" id="match3-result-title">关卡完成！</div>
@@ -1975,6 +1984,74 @@ let match3State = {
   score: 0, moves: 0, combo: 0, time: 0, timer: null,
   playing: false, locked: false, finished: false
 };
+let match3Audio = { ctx: null, enabled: true };
+
+function ensureMatch3Audio() {
+  if (!match3Audio.enabled) return null;
+  const AudioCtor = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtor) return null;
+  if (!match3Audio.ctx) match3Audio.ctx = new AudioCtor();
+  if (match3Audio.ctx.state === 'suspended') match3Audio.ctx.resume();
+  return match3Audio.ctx;
+}
+
+function playMatch3Tone(frequency, duration = .12, type = 'sine', volume = .045, delay = 0) {
+  const ctx = ensureMatch3Audio();
+  if (!ctx) return;
+  const now = ctx.currentTime + delay;
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, now);
+  gain.gain.setValueAtTime(.0001, now);
+  gain.gain.exponentialRampToValueAtTime(volume, now + .012);
+  gain.gain.exponentialRampToValueAtTime(.0001, now + duration);
+  oscillator.connect(gain).connect(ctx.destination);
+  oscillator.start(now);
+  oscillator.stop(now + duration + .025);
+}
+
+function playMatch3Sound(kind, combo = 1) {
+  if (!match3Audio.enabled) return;
+  if (kind === 'select') playMatch3Tone(520, .07, 'sine', .028);
+  if (kind === 'invalid') { playMatch3Tone(180, .12, 'square', .025); playMatch3Tone(130, .14, 'square', .02, .08); }
+  if (kind === 'match') { playMatch3Tone(440, .12, 'triangle', .035); playMatch3Tone(660, .16, 'triangle', .042, .08); }
+  if (kind === 'combo') {
+    const base = 520 + Math.min(combo, 5) * 45;
+    [0, 4, 7, 12].slice(0, Math.min(4, combo + 1)).forEach((step, index) => playMatch3Tone(base * Math.pow(2, step / 12), .16, 'triangle', .035 + combo * .004, index * .075));
+  }
+  if (kind === 'drop') playMatch3Tone(240, .09, 'sine', .018);
+  if (kind === 'shuffle') { playMatch3Tone(300, .08, 'sawtooth', .018); playMatch3Tone(460, .1, 'sawtooth', .022, .08); }
+  if (kind === 'hint') playMatch3Tone(740, .16, 'sine', .025);
+  if (kind === 'win') [523, 659, 784, 1046].forEach((frequency, index) => playMatch3Tone(frequency, .22, 'triangle', .045, index * .11));
+  if (kind === 'lose') { playMatch3Tone(260, .2, 'sine', .03); playMatch3Tone(190, .28, 'sine', .026, .18); }
+}
+
+const MATCH3_CHEERS = [
+  ['GOOD!', '漂亮！继续保持'],
+  ['EXCELLENT!', '太精彩了！这一手很稳'],
+  ['AMAZING!', '这也行？！你太强了'],
+  ['UNBELIEVABLE!', '连消爆发！猪猪都看呆了'],
+  ['PERFECT!', '完美连击！距离胜利更近了']
+];
+
+function showMatch3Cheer(combo = 1, count = 3) {
+  const cheer = $('#match3-cheer');
+  const shell = document.querySelector('.match3-board-shell');
+  if (!cheer) return;
+  const index = combo >= 4 ? 4 : combo >= 3 ? 3 : combo >= 2 ? 2 : count >= 4 ? 1 : 0;
+  const [english, chinese] = MATCH3_CHEERS[index];
+  cheer.querySelector('.match3-cheer-en').textContent = english;
+  cheer.querySelector('.match3-cheer-cn').textContent = chinese;
+  cheer.classList.remove('show');
+  void cheer.offsetWidth;
+  cheer.classList.add('show');
+  if (shell) {
+    shell.classList.remove('combo-burst');
+    void shell.offsetWidth;
+    shell.classList.add('combo-burst');
+  }
+}
 let match3Gesture = null;
 let match3SuppressClickUntil = 0;
 
@@ -2160,13 +2237,16 @@ function renderMatch3(matchSet = new Set(), fallingMap = new Map()) {
 function clickMatch3(index) {
   if (match3State.locked || match3State.finished || match3State.board[index] === null) return;
   if (!match3State.playing) startMatch3Timer();
+  ensureMatch3Audio();
   if (match3State.selected < 0) {
     match3State.selected = index;
+    playMatch3Sound('select');
     renderMatch3();
     return;
   }
   if (match3State.selected === index) {
     match3State.selected = -1;
+    playMatch3Sound('select');
     renderMatch3();
     return;
   }
@@ -2188,6 +2268,7 @@ function clickMatch3(index) {
   updateMatch3Stats();
   if (!matches.size) {
     [match3State.board[first], match3State.board[index]] = [match3State.board[index], match3State.board[first]];
+    playMatch3Sound('invalid');
     renderMatch3();
     if (match3State.moves >= match3State.maxMoves) {
       endMatch3(false);
@@ -2262,6 +2343,7 @@ function showMatch3Result(win) {
   match3State.finished = true;
   match3State.locked = true;
   stopAllTimers();
+  playMatch3Sound(win ? 'win' : 'lose');
   const result = $('#match3-result');
   $('#match3-result-burst').textContent = win ? '🏆' : '⏳';
   $('#match3-result-title').textContent = win ? '关卡完成！' : '步数用完了';
@@ -2283,6 +2365,8 @@ async function resolveMatch3(initialMatches) {
     chain++;
     match3State.combo = chain;
     match3State.score += matches.size * 10 * chain;
+    playMatch3Sound(chain > 1 ? 'combo' : 'match', chain);
+    showMatch3Cheer(chain, matches.size);
     updateMatch3Stats();
     burstMatch3Tiles(matches);
     renderMatch3(matches);
@@ -2291,6 +2375,7 @@ async function resolveMatch3(initialMatches) {
     renderMatch3();
     await waitMatch3(70);
     const falling = collapseMatch3Board();
+    playMatch3Sound('drop');
     renderMatch3(new Set(), falling);
     await waitMatch3(480);
     matches = findMatch3Matches();
@@ -2318,6 +2403,7 @@ function shuffleMatch3(manual = true) {
   if (match3State.locked || match3State.finished) return;
   match3State.board = createMatch3Board();
   match3State.selected = -1;
+  playMatch3Sound('shuffle');
   renderMatch3();
   if (manual) setMatch3Message('牌面已洗牌，继续寻找三连');
 }
@@ -2331,6 +2417,7 @@ function hintMatch3() {
     return;
   }
   const tiles = $all('.match3-tile');
+  playMatch3Sound('hint');
   move.forEach(index => tiles[index].classList.add('hint'));
   setMatch3Message('绿色闪烁的是推荐交换位置');
   setTimeout(() => move.forEach(index => tiles[index]?.classList.remove('hint')), 1500);
@@ -2734,6 +2821,13 @@ $('[data-act="linkup-quiz-close"]').onclick = closeLinkQuiz;
 $('[data-act="match3-reset"]').onclick = initMatch3;
 $('[data-act="match3-hint"]').onclick = hintMatch3;
 $('[data-act="match3-shuffle"]').onclick = () => shuffleMatch3(true);
+$('[data-act="match3-sound"]').onclick = event => {
+  match3Audio.enabled = !match3Audio.enabled;
+  const button = event.currentTarget;
+  button.textContent = match3Audio.enabled ? '🔊 音效' : '🔇 静音';
+  button.setAttribute('aria-pressed', String(!match3Audio.enabled));
+  if (match3Audio.enabled) { ensureMatch3Audio(); playMatch3Sound('select'); }
+};
 $('[data-act="match3-result-reset"]').onclick = initMatch3;
 $('[data-act="deng-reset"]').onclick = initDeng;
 $('[data-act="deng-hint"]').onclick = hintDeng;
